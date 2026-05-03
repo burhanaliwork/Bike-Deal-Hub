@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { ArrowLeft, Phone, Heart, Share2, Bike, Calendar, Tag, Zap, Mountain, Wind, Users, HelpCircle } from "lucide-react";
+import { ArrowRight, Phone, Heart, Share2, Bike, Calendar, Tag, Zap, Mountain, Wind, Users, HelpCircle } from "lucide-react";
 import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -14,10 +14,10 @@ const categoryIcons: Record<string, any> = {
   mountain: Mountain, road: Wind, electric: Zap, bmx: Tag, kids: Users, hybrid: Bike, other: HelpCircle,
 };
 const categoryLabels: Record<string, string> = {
-  mountain: "Mountain", road: "Road", electric: "Electric", bmx: "BMX", kids: "Kids", hybrid: "Hybrid", other: "Other",
+  mountain: "جبلية", road: "طريق", electric: "كهربائية", bmx: "بي إم إكس", kids: "أطفال", hybrid: "هجين", other: "أخرى",
 };
 const conditionLabels: Record<string, string> = {
-  new: "New", like_new: "Like New", good: "Good", fair: "Fair",
+  new: "جديدة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
 };
 
 export default function BikeDetailPage() {
@@ -39,7 +39,7 @@ export default function BikeDetailPage() {
         onSuccess: () => {
           qc.invalidateQueries({ queryKey: getGetFavoritesQueryKey() });
           qc.invalidateQueries({ queryKey: getGetBikeQueryKey(bike.id) });
-          toast({ title: "Removed from favorites" });
+          toast({ title: "تمت إزالتها من المفضلة" });
         },
       });
     } else {
@@ -47,7 +47,7 @@ export default function BikeDetailPage() {
         onSuccess: () => {
           qc.invalidateQueries({ queryKey: getGetFavoritesQueryKey() });
           qc.invalidateQueries({ queryKey: getGetBikeQueryKey(bike.id) });
-          toast({ title: "Added to favorites" });
+          toast({ title: "تمت إضافتها للمفضلة" });
         },
       });
     }
@@ -55,7 +55,7 @@ export default function BikeDetailPage() {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast({ title: "Link copied to clipboard!" });
+    toast({ title: "تم نسخ الرابط!" });
   };
 
   return (
@@ -67,8 +67,8 @@ export default function BikeDetailPage() {
           onClick={() => navigate("/listings")}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 group"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to listings
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          العودة للإعلانات
         </button>
 
         {isLoading ? (
@@ -85,8 +85,8 @@ export default function BikeDetailPage() {
         ) : !bike ? (
           <div className="text-center py-20">
             <Bike className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Bike not found</h2>
-            <Button onClick={() => navigate("/listings")} variant="outline">Back to listings</Button>
+            <h2 className="text-xl font-bold mb-2">الدراجة غير موجودة</h2>
+            <Button onClick={() => navigate("/listings")} variant="outline">العودة للإعلانات</Button>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-8">
@@ -106,7 +106,7 @@ export default function BikeDetailPage() {
                   <Bike className="w-24 h-24 text-muted-foreground/30" />
                 </div>
               )}
-              <div className="absolute top-4 right-4 flex gap-2">
+              <div className="absolute top-4 left-4 flex gap-2">
                 <Show when="signed-in">
                   <button
                     onClick={handleFavoriteToggle}
@@ -135,7 +135,7 @@ export default function BikeDetailPage() {
               </div>
 
               <div className="text-3xl font-black text-primary mb-4">
-                SAR {Number(bike.price).toLocaleString()}
+                {Number(bike.price).toLocaleString()} ر.س
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">
@@ -153,13 +153,13 @@ export default function BikeDetailPage() {
 
               {bike.description && (
                 <div className="mb-5">
-                  <h3 className="font-semibold text-foreground mb-2">Description</h3>
+                  <h3 className="font-semibold text-foreground mb-2">الوصف</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{bike.description}</p>
                 </div>
               )}
 
               <div className="border border-border rounded-xl p-4 mb-5 space-y-3">
-                <h3 className="font-semibold text-foreground">Seller Information</h3>
+                <h3 className="font-semibold text-foreground">معلومات البائع</h3>
                 {bike.userName && (
                   <div className="text-sm text-muted-foreground">
                     <span className="font-medium text-foreground">{bike.userName}</span>
@@ -167,12 +167,12 @@ export default function BikeDetailPage() {
                 )}
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-primary" />
-                  <span className="font-bold text-foreground text-lg">{bike.phone}</span>
+                  <span className="font-bold text-foreground text-lg" dir="ltr">{bike.phone}</span>
                 </div>
                 {bike.createdAt && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
-                    Listed {new Date(bike.createdAt).toLocaleDateString("en-SA", { year: "numeric", month: "long", day: "numeric" })}
+                    تاريخ النشر: {new Date(bike.createdAt).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
                   </div>
                 )}
               </div>
@@ -183,15 +183,15 @@ export default function BikeDetailPage() {
                   className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                 >
                   <Phone className="w-5 h-5" />
-                  Call Seller
+                  اتصل بالبائع
                 </a>
                 <a
-                  href={`https://wa.me/${bike.phone.replace(/\D/g, "")}?text=Hi, I'm interested in your bike listing: ${bike.title}`}
+                  href={`https://wa.me/${bike.phone.replace(/\D/g, "")}?text=مرحباً، أنا مهتم بإعلان دراجتك: ${bike.title}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                 >
-                  WhatsApp
+                  واتساب
                 </a>
               </div>
             </div>

@@ -14,11 +14,11 @@ export default function Navbar() {
   const isAdmin = (user?.publicMetadata as any)?.role === "admin";
 
   const navLinks = [
-    { href: "/listings", label: "Browse Bikes", icon: Bike },
-    { href: "/sell", label: "Sell a Bike", icon: PlusCircle, authRequired: true },
-    { href: "/my-listings", label: "My Listings", icon: List, authRequired: true },
-    { href: "/favorites", label: "Favorites", icon: Heart, authRequired: true },
-    { href: "/admin", label: "Admin", icon: LayoutDashboard, adminOnly: true },
+    { href: "/listings", label: "تصفح الدراجات", icon: Bike },
+    { href: "/sell", label: "بيع دراجة", icon: PlusCircle, authRequired: true },
+    { href: "/my-listings", label: "إعلاناتي", icon: List, authRequired: true },
+    { href: "/favorites", label: "المفضلة", icon: Heart, authRequired: true },
+    { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, adminOnly: true },
   ];
 
   const isActive = (href: string) => location === href || location.startsWith(href + "/");
@@ -99,13 +99,13 @@ export default function Navbar() {
               <Link href="/sign-in">
                 <Button variant="ghost" size="sm" className="gap-1.5">
                   <LogIn className="w-4 h-4" />
-                  Sign In
+                  تسجيل الدخول
                 </Button>
               </Link>
               <Link href="/sign-up">
                 <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90">
                   <UserPlus className="w-4 h-4" />
-                  Register
+                  حساب جديد
                 </Button>
               </Link>
             </Show>
@@ -121,7 +121,7 @@ export default function Navbar() {
                   onClick={() => signOut()}
                 >
                   <LogOut className="w-4 h-4" />
-                  Sign Out
+                  تسجيل الخروج
                 </Button>
               </div>
             </Show>
@@ -164,13 +164,13 @@ export default function Navbar() {
               <Link href="/sign-in" onClick={() => setOpen(false)}>
                 <Button variant="outline" className="w-full gap-1.5">
                   <LogIn className="w-4 h-4" />
-                  Sign In
+                  تسجيل الدخول
                 </Button>
               </Link>
               <Link href="/sign-up" onClick={() => setOpen(false)}>
                 <Button className="w-full gap-1.5 bg-primary hover:bg-primary/90">
                   <UserPlus className="w-4 h-4" />
-                  Register
+                  حساب جديد
                 </Button>
               </Link>
             </Show>
@@ -181,7 +181,7 @@ export default function Navbar() {
                 onClick={() => { signOut(); setOpen(false); }}
               >
                 <LogOut className="w-4 h-4" />
-                Sign Out
+                تسجيل الخروج
               </Button>
             </Show>
           </div>

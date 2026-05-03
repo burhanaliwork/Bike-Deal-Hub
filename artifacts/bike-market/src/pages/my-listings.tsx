@@ -23,9 +23,9 @@ export default function MyListingsPage() {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getGetMyBikesQueryKey() });
         qc.invalidateQueries({ queryKey: getListBikesQueryKey() });
-        toast({ title: "Listing deleted" });
+        toast({ title: "تم حذف الإعلان" });
       },
-      onError: () => toast({ title: "Failed to delete", variant: "destructive" }),
+      onError: () => toast({ title: "فشل الحذف", variant: "destructive" }),
     });
   };
 
@@ -33,7 +33,7 @@ export default function MyListingsPage() {
     updateBike.mutate({ id, data: { } }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getGetMyBikesQueryKey() });
-        toast({ title: "Marked as sold" });
+        toast({ title: "تم وضع علامة مباعة" });
       },
     });
   };
@@ -48,13 +48,13 @@ export default function MyListingsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-foreground mb-1">My Listings</h1>
-            <p className="text-muted-foreground">Manage your bike listings</p>
+            <h1 className="text-3xl font-black text-foreground mb-1">إعلاناتي</h1>
+            <p className="text-muted-foreground">إدارة إعلانات دراجاتك</p>
           </div>
           <Link href="/sell">
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <PlusCircle className="w-4 h-4" />
-              Post New Bike
+              إضافة دراجة جديدة
             </Button>
           </Link>
         </div>
@@ -75,12 +75,12 @@ export default function MyListingsPage() {
         ) : !bikes || bikes.length === 0 ? (
           <div className="text-center py-20 bg-card rounded-xl border border-border">
             <Bike className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No listings yet</h3>
-            <p className="text-muted-foreground mb-6">Post your first bike and start selling!</p>
+            <h3 className="text-lg font-semibold text-foreground mb-2">لا توجد إعلانات بعد</h3>
+            <p className="text-muted-foreground mb-6">انشر دراجتك الأولى وابدأ البيع!</p>
             <Link href="/sell">
               <Button className="bg-primary hover:bg-primary/90 gap-2">
                 <PlusCircle className="w-4 h-4" />
-                Post a Bike
+                نشر دراجة
               </Button>
             </Link>
           </div>
@@ -104,13 +104,13 @@ export default function MyListingsPage() {
                       <h3 className="font-semibold text-foreground truncate">{bike.title}</h3>
                       <StatusBadge status={bike.status} />
                     </div>
-                    <div className="text-xl font-bold text-primary mb-1">SAR {Number(bike.price).toLocaleString()}</div>
+                    <div className="text-xl font-bold text-primary mb-1">{Number(bike.price).toLocaleString()} ر.س</div>
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Phone className="w-3.5 h-3.5" />
-                      {bike.phone}
+                      <span dir="ltr">{bike.phone}</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      Posted {new Date(bike.createdAt).toLocaleDateString("en-SA")}
+                      تاريخ النشر: {new Date(bike.createdAt).toLocaleDateString("ar-SA")}
                     </div>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export default function MyListingsPage() {
                   <Link href={`/listings/${bike.id}`}>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8">
                       <Eye className="w-3.5 h-3.5" />
-                      View
+                      عرض
                     </Button>
                   </Link>
                   {bike.status !== "sold" && (
@@ -128,30 +128,30 @@ export default function MyListingsPage() {
                       className="gap-1.5 h-8 text-gray-600"
                       onClick={() => handleMarkSold(bike.id)}
                     >
-                      Mark as Sold
+                      وضع علامة مباعة
                     </Button>
                   )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-1.5 h-8 text-destructive hover:text-destructive ml-auto">
+                      <Button variant="outline" size="sm" className="gap-1.5 h-8 text-destructive hover:text-destructive ms-auto">
                         <Trash2 className="w-3.5 h-3.5" />
-                        Delete
+                        حذف
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete listing?</AlertDialogTitle>
+                        <AlertDialogTitle>حذف الإعلان؟</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently remove "{bike.title}" from the marketplace.
+                          سيتم حذف "{bike.title}" نهائياً من السوق.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(bike.id)}
                           className="bg-destructive hover:bg-destructive/90"
                         >
-                          Delete
+                          حذف
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

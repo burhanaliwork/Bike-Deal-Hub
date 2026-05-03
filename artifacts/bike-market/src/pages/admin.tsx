@@ -17,6 +17,13 @@ import { cn } from "@/lib/utils";
 
 type Tab = "overview" | "listings" | "users";
 
+const statusLabels: Record<string, string> = {
+  active: "تمت الموافقة",
+  rejected: "تم الرفض",
+  sold: "تم وضعها مباعة",
+  pending: "قيد المراجعة",
+};
+
 export default function AdminPage() {
   const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -28,17 +35,17 @@ export default function AdminPage() {
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-20 text-center">
           <ShieldAlert className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">You don't have permission to view this page.</p>
+          <h2 className="text-2xl font-bold mb-2">الوصول مرفوض</h2>
+          <p className="text-muted-foreground">ليست لديك صلاحية لعرض هذه الصفحة.</p>
         </div>
       </div>
     );
   }
 
   const tabs: { id: Tab; label: string; icon: any }[] = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "listings", label: "All Listings", icon: Bike },
-    { id: "users", label: "Users", icon: Users },
+    { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
+    { id: "listings", label: "جميع الإعلانات", icon: Bike },
+    { id: "users", label: "المستخدمون", icon: Users },
   ];
 
   return (
@@ -50,8 +57,8 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-foreground mb-1">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage the marketplace</p>
+          <h1 className="text-3xl font-black text-foreground mb-1">لوحة تحكم الإدارة</h1>
+          <p className="text-muted-foreground">إدارة السوق</p>
         </div>
 
         {/* Tabs */}
@@ -97,14 +104,14 @@ function AdminOverview() {
   if (!stats) return null;
 
   const statCards = [
-    { label: "Total Users", value: stats.totalUsers, icon: Users, color: "text-blue-600 bg-blue-50" },
-    { label: "Total Bikes", value: stats.totalBikes, icon: Bike, color: "text-orange-600 bg-orange-50" },
-    { label: "Active Listings", value: stats.activeBikes, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50" },
-    { label: "Pending Review", value: stats.pendingBikes, icon: Clock, color: "text-amber-600 bg-amber-50" },
-    { label: "Sold Bikes", value: stats.soldBikes, icon: TrendingUp, color: "text-purple-600 bg-purple-50" },
-    { label: "Rejected", value: stats.rejectedBikes, icon: Ban, color: "text-red-600 bg-red-50" },
-    { label: "New Users (Month)", value: stats.newUsersThisMonth, icon: Users, color: "text-cyan-600 bg-cyan-50" },
-    { label: "New Bikes (Month)", value: stats.newBikesThisMonth, icon: Bike, color: "text-indigo-600 bg-indigo-50" },
+    { label: "إجمالي المستخدمين", value: stats.totalUsers, icon: Users, color: "text-blue-600 bg-blue-50" },
+    { label: "إجمالي الدراجات", value: stats.totalBikes, icon: Bike, color: "text-orange-600 bg-orange-50" },
+    { label: "إعلانات نشطة", value: stats.activeBikes, icon: CheckCircle, color: "text-emerald-600 bg-emerald-50" },
+    { label: "قيد المراجعة", value: stats.pendingBikes, icon: Clock, color: "text-amber-600 bg-amber-50" },
+    { label: "دراجات مباعة", value: stats.soldBikes, icon: TrendingUp, color: "text-purple-600 bg-purple-50" },
+    { label: "مرفوضة", value: stats.rejectedBikes, icon: Ban, color: "text-red-600 bg-red-50" },
+    { label: "مستخدمون جدد (الشهر)", value: stats.newUsersThisMonth, icon: Users, color: "text-cyan-600 bg-cyan-50" },
+    { label: "دراجات جديدة (الشهر)", value: stats.newBikesThisMonth, icon: Bike, color: "text-indigo-600 bg-indigo-50" },
   ];
 
   return (
@@ -133,9 +140,9 @@ function AdminListings() {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getAdminListBikesQueryKey() });
         qc.invalidateQueries({ queryKey: getGetAdminStatsQueryKey() });
-        toast({ title: `Listing ${status}` });
+        toast({ title: statusLabels[status] || "تم التحديث" });
       },
-      onError: () => toast({ title: "Failed to update status", variant: "destructive" }),
+      onError: () => toast({ title: "فشل تحديث الحالة", variant: "destructive" }),
     });
   };
 
@@ -149,7 +156,7 @@ function AdminListings() {
 
   return (
     <div className="space-y-3">
-      <div className="text-sm text-muted-foreground mb-4">{bikes?.length ?? 0} total listings</div>
+      <div className="text-sm text-muted-foreground mb-4">{bikes?.length ?? 0} إجمالي الإعلانات</div>
       {bikes?.map((bike: any) => (
         <div key={bike.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
           <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
@@ -168,26 +175,26 @@ function AdminListings() {
               <StatusBadge status={bike.status} />
             </div>
             <div className="text-sm text-muted-foreground">
-              SAR {Number(bike.price).toLocaleString()} · {bike.category} · {bike.userName || "Unknown user"}
+              {Number(bike.price).toLocaleString()} ر.س · {bike.category} · {bike.userName || "مستخدم غير معروف"}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {bike.status !== "active" && (
               <Button size="sm" variant="outline" className="h-8 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                 onClick={() => handleStatus(bike.id, "active")}>
-                <CheckCircle className="w-3.5 h-3.5 mr-1" /> Approve
+                <CheckCircle className="w-3.5 h-3.5 ml-1" /> موافقة
               </Button>
             )}
             {bike.status !== "rejected" && (
               <Button size="sm" variant="outline" className="h-8 text-red-600 border-red-200 hover:bg-red-50"
                 onClick={() => handleStatus(bike.id, "rejected")}>
-                <XCircle className="w-3.5 h-3.5 mr-1" /> Reject
+                <XCircle className="w-3.5 h-3.5 ml-1" /> رفض
               </Button>
             )}
             {bike.status !== "sold" && (
               <Button size="sm" variant="outline" className="h-8 text-gray-600"
                 onClick={() => handleStatus(bike.id, "sold")}>
-                Mark Sold
+                وضع مباعة
               </Button>
             )}
           </div>
@@ -210,7 +217,7 @@ function AdminUsers() {
 
   return (
     <div className="space-y-3">
-      <div className="text-sm text-muted-foreground mb-4">{users?.length ?? 0} registered users</div>
+      <div className="text-sm text-muted-foreground mb-4">{users?.length ?? 0} مستخدم مسجل</div>
       {users?.map((u: any) => (
         <div key={u.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -219,13 +226,13 @@ function AdminUsers() {
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-foreground">{u.name || "Unnamed user"}</div>
+            <div className="font-medium text-foreground">{u.name || "مستخدم بدون اسم"}</div>
             <div className="text-sm text-muted-foreground truncate">{u.email}</div>
           </div>
-          <div className="text-right flex-shrink-0">
-            <div className="text-sm font-semibold text-foreground">{u.listingsCount} listings</div>
+          <div className="text-left flex-shrink-0">
+            <div className="text-sm font-semibold text-foreground">{u.listingsCount} إعلان</div>
             <div className="text-xs text-muted-foreground">
-              {new Date(u.createdAt).toLocaleDateString("en-SA")}
+              {new Date(u.createdAt).toLocaleDateString("ar-SA")}
             </div>
           </div>
         </div>

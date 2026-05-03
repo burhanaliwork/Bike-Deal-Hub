@@ -10,22 +10,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = [
-  { value: "", label: "All Categories" },
-  { value: "mountain", label: "Mountain" },
-  { value: "road", label: "Road" },
-  { value: "electric", label: "Electric" },
-  { value: "bmx", label: "BMX" },
-  { value: "kids", label: "Kids" },
-  { value: "hybrid", label: "Hybrid" },
-  { value: "other", label: "Other" },
+  { value: "", label: "جميع الفئات" },
+  { value: "mountain", label: "جبلية" },
+  { value: "road", label: "طريق" },
+  { value: "electric", label: "كهربائية" },
+  { value: "bmx", label: "بي إم إكس" },
+  { value: "kids", label: "أطفال" },
+  { value: "hybrid", label: "هجين" },
+  { value: "other", label: "أخرى" },
 ];
 
 const conditions = [
-  { value: "", label: "Any Condition" },
-  { value: "new", label: "New" },
-  { value: "like_new", label: "Like New" },
-  { value: "good", label: "Good" },
-  { value: "fair", label: "Fair" },
+  { value: "", label: "أي حالة" },
+  { value: "new", label: "جديدة" },
+  { value: "like_new", label: "شبه جديدة" },
+  { value: "good", label: "جيدة" },
+  { value: "fair", label: "مقبولة" },
 ];
 
 export default function ListingsPage() {
@@ -72,16 +72,16 @@ export default function ListingsPage() {
         <div className="mb-6">
           <form onSubmit={handleSearch} className="flex gap-3 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search bikes..."
+                placeholder="ابحث عن دراجة..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-9 h-11"
+                className="pr-9 h-11"
               />
             </div>
             <Button type="submit" className="h-11 bg-primary hover:bg-primary/90 px-5">
-              Search
+              بحث
             </Button>
             <Button
               type="button"
@@ -90,7 +90,7 @@ export default function ListingsPage() {
               onClick={() => setShowFilters(!showFilters)}
             >
               <SlidersHorizontal className="w-4 h-4" />
-              Filters
+              فلترة
               {hasFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
             </Button>
           </form>
@@ -99,7 +99,7 @@ export default function ListingsPage() {
             <div className="bg-card border border-border rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-3">
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder="الفئة" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
@@ -110,7 +110,7 @@ export default function ListingsPage() {
 
               <Select value={condition} onValueChange={setCondition}>
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Condition" />
+                  <SelectValue placeholder="الحالة" />
                 </SelectTrigger>
                 <SelectContent>
                   {conditions.map((c) => (
@@ -120,14 +120,14 @@ export default function ListingsPage() {
               </Select>
 
               <Input
-                placeholder="Min price (SAR)"
+                placeholder="أقل سعر (ر.س)"
                 type="number"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="h-10"
               />
               <Input
-                placeholder="Max price (SAR)"
+                placeholder="أعلى سعر (ر.س)"
                 type="number"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
@@ -141,7 +141,7 @@ export default function ListingsPage() {
               onClick={clearFilters}
               className="mt-2 text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
-              <X className="w-3.5 h-3.5" /> Clear all filters
+              <X className="w-3.5 h-3.5" /> مسح كل الفلاتر
             </button>
           )}
         </div>
@@ -149,7 +149,7 @@ export default function ListingsPage() {
         {/* Results header */}
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-xl font-bold text-foreground">
-            {isLoading ? "Loading..." : `${bikes?.length ?? 0} bikes available`}
+            {isLoading ? "جاري التحميل..." : `${bikes?.length ?? 0} دراجة متوفرة`}
           </h1>
         </div>
 
@@ -176,11 +176,11 @@ export default function ListingsPage() {
         ) : (
           <div className="text-center py-20">
             <Bike className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2">No bikes found</h3>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters or search terms.</p>
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">لا توجد دراجات</h3>
+            <p className="text-sm text-muted-foreground">جرب تعديل الفلاتر أو كلمات البحث.</p>
             {hasFilters && (
               <Button variant="outline" onClick={clearFilters} className="mt-4">
-                Clear Filters
+                مسح الفلاتر
               </Button>
             )}
           </div>

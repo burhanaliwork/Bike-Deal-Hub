@@ -33,13 +33,13 @@ const categoryIcons: Record<string, any> = {
 };
 
 const categoryLabels: Record<string, string> = {
-  mountain: "Mountain",
-  road: "Road",
-  electric: "Electric",
-  bmx: "BMX",
-  kids: "Kids",
-  hybrid: "Hybrid",
-  other: "Other",
+  mountain: "جبلية",
+  road: "طريق",
+  electric: "كهربائية",
+  bmx: "بي إم إكس",
+  kids: "أطفال",
+  hybrid: "هجين",
+  other: "أخرى",
 };
 
 const conditionColors: Record<string, string> = {
@@ -50,10 +50,10 @@ const conditionColors: Record<string, string> = {
 };
 
 const conditionLabels: Record<string, string> = {
-  new: "New",
-  like_new: "Like New",
-  good: "Good",
-  fair: "Fair",
+  new: "جديدة",
+  like_new: "شبه جديدة",
+  good: "جيدة",
+  fair: "مقبولة",
 };
 
 export default function BikeCard({ bike, showStatus = false }: { bike: Bike; showStatus?: boolean }) {
@@ -71,7 +71,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         onSuccess: () => {
           qc.invalidateQueries({ queryKey: getGetFavoritesQueryKey() });
           qc.invalidateQueries({ queryKey: getListBikesQueryKey() });
-          toast({ title: "Removed from favorites" });
+          toast({ title: "تمت إزالتها من المفضلة" });
         },
       });
     } else {
@@ -79,7 +79,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         onSuccess: () => {
           qc.invalidateQueries({ queryKey: getGetFavoritesQueryKey() });
           qc.invalidateQueries({ queryKey: getListBikesQueryKey() });
-          toast({ title: "Added to favorites" });
+          toast({ title: "تمت إضافتها للمفضلة" });
         },
       });
     }
@@ -109,7 +109,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         )}
 
         {/* Category chip */}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 right-3">
           <span className="flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
             <CategoryIcon className="w-3 h-3" />
             {categoryLabels[bike.category] || bike.category}
@@ -121,7 +121,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
           <button
             onClick={(e) => { e.stopPropagation(); handleFavoriteToggle(e); }}
             className={cn(
-              "absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all",
+              "absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all",
               bike.isFavorited
                 ? "bg-red-500 text-white shadow-md"
                 : "bg-black/50 backdrop-blur-sm text-white hover:bg-red-500"
@@ -132,7 +132,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         </Show>
 
         {showStatus && (
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute bottom-3 right-3">
             <StatusBadge status={bike.status} />
           </div>
         )}
@@ -144,7 +144,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
             {bike.title}
           </h3>
           <span className="font-bold text-primary whitespace-nowrap">
-            SAR {bike.price.toLocaleString()}
+            {bike.price.toLocaleString()} ر.س
           </span>
         </div>
 
@@ -160,13 +160,13 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         <div className="flex items-center justify-between pt-3 border-t border-border" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Phone className="w-3.5 h-3.5" />
-            <span className="font-medium text-foreground">{bike.phone}</span>
+            <span className="font-medium text-foreground" dir="ltr">{bike.phone}</span>
           </div>
           <a
             href={`tel:${bike.phone}`}
             className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white px-2.5 py-1 rounded-md font-medium transition-colors"
           >
-            Call Seller
+            اتصل بالبائع
           </a>
         </div>
       </div>
@@ -182,10 +182,10 @@ export function StatusBadge({ status }: { status: string }) {
     rejected: "bg-red-100 text-red-700 border border-red-200",
   };
   const labels: Record<string, string> = {
-    active: "Active",
-    pending: "Pending",
-    sold: "Sold",
-    rejected: "Rejected",
+    active: "نشط",
+    pending: "قيد المراجعة",
+    sold: "مباع",
+    rejected: "مرفوض",
   };
   return (
     <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full", variants[status] || variants.pending)}>

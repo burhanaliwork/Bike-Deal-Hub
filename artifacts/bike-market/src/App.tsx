@@ -165,8 +165,18 @@ function ClerkProviderWithRoutes() {
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
       localization={{
-        signIn: { start: { title: "Welcome back", subtitle: "Sign in to your account" } },
-        signUp: { start: { title: "Join Bike Market", subtitle: "Create your free account" } },
+        signIn: {
+          start: { title: "مرحباً بعودتك", subtitle: "سجل الدخول إلى حسابك", actionText: "ليس لديك حساب؟", actionLink: "إنشاء حساب" },
+        },
+        signUp: {
+          start: { title: "انضم إلى سوق الدراجات", subtitle: "أنشئ حسابك المجاني", actionText: "لديك حساب بالفعل؟", actionLink: "تسجيل الدخول" },
+        },
+        formFieldLabel__emailAddress: "البريد الإلكتروني",
+        formFieldLabel__password: "كلمة المرور",
+        formFieldInputPlaceholder__emailAddress: "أدخل بريدك الإلكتروني",
+        formButtonPrimary: "متابعة",
+        socialButtonsBlockButton: "المتابعة عبر {{provider|titleize}}",
+        dividerText: "أو",
       }}
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
