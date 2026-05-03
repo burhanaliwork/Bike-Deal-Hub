@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Bike marketplace API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: bikes
+    description: Bike listings
+  - name: favorites
+    description: User favorites
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,260 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /bikes:
+    get:
+      operationId: listBikes
+      tags: [bikes]
+      summary: List all bike listings
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: condition
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bikes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bike"
+    post:
+      operationId: createBike
+      tags: [bikes]
+      summary: Create a new bike listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBikeBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+
+  /bikes/{id}:
+    get:
+      operationId: getBike
+      tags: [bikes]
+      summary: Get bike by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bike details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+        "404":
+          description: Not found
+    put:
+      operationId: updateBike
+      tags: [bikes]
+      summary: Update a bike listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBikeBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+    delete:
+      operationId: deleteBike
+      tags: [bikes]
+      summary: Delete a bike listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /bikes/my:
+    get:
+      operationId: getMyBikes
+      tags: [bikes]
+      summary: Get current user's bike listings
+      responses:
+        "200":
+          description: User's bikes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bike"
+
+  /bikes/stats:
+    get:
+      operationId: getBikeStats
+      tags: [bikes]
+      summary: Get marketplace stats
+      responses:
+        "200":
+          description: Marketplace stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceStats"
+
+  /favorites:
+    get:
+      operationId: getFavorites
+      tags: [favorites]
+      summary: Get current user's favorites
+      responses:
+        "200":
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bike"
+
+  /favorites/{bikeId}:
+    post:
+      operationId: addFavorite
+      tags: [favorites]
+      summary: Add bike to favorites
+      parameters:
+        - name: bikeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Added
+    delete:
+      operationId: removeFavorite
+      tags: [favorites]
+      summary: Remove bike from favorites
+      parameters:
+        - name: bikeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get admin dashboard stats
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/bikes:
+    get:
+      operationId: adminListBikes
+      tags: [admin]
+      summary: Admin - list all bikes (including pending)
+      responses:
+        "200":
+          description: All bikes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bike"
+
+  /admin/bikes/{id}/status:
+    put:
+      operationId: adminUpdateBikeStatus
+      tags: [admin]
+      summary: Admin - update bike listing status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBikeStatusBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: Admin - list all users
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +293,187 @@ components:
       required:
         - status
 
+    Bike:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+          description: "mountain, road, bmx, electric, kids, hybrid, other"
+        condition:
+          type: string
+          description: "new, like_new, good, fair"
+        brand:
+          type: string
+        phone:
+          type: string
+        imageUrl:
+          type: string
+        status:
+          type: string
+          description: "active, pending, sold, rejected"
+        userId:
+          type: string
+        userName:
+          type: string
+        userEmail:
+          type: string
+        isFavorited:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - price
+        - category
+        - condition
+        - phone
+        - status
+        - userId
+        - createdAt
+
+    CreateBikeBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        condition:
+          type: string
+        brand:
+          type: string
+        phone:
+          type: string
+        imageUrl:
+          type: string
+      required:
+        - title
+        - price
+        - category
+        - condition
+        - phone
+
+    UpdateBikeBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        condition:
+          type: string
+        brand:
+          type: string
+        phone:
+          type: string
+        imageUrl:
+          type: string
+
+    UpdateBikeStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    MarketplaceStats:
+      type: object
+      properties:
+        totalListings:
+          type: integer
+        activeListings:
+          type: integer
+        soldListings:
+          type: integer
+        categoryBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              count:
+                type: integer
+            required:
+              - category
+              - count
+        recentListings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bike"
+      required:
+        - totalListings
+        - activeListings
+        - soldListings
+        - categoryBreakdown
+        - recentListings
+
+    AdminStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        totalBikes:
+          type: integer
+        activeBikes:
+          type: integer
+        pendingBikes:
+          type: integer
+        soldBikes:
+          type: integer
+        rejectedBikes:
+          type: integer
+        newUsersThisMonth:
+          type: integer
+        newBikesThisMonth:
+          type: integer
+      required:
+        - totalUsers
+        - totalBikes
+        - activeBikes
+        - pendingBikes
+        - soldBikes
+        - rejectedBikes
+        - newUsersThisMonth
+        - newBikesThisMonth
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        listingsCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - createdAt
