@@ -1,6 +1,6 @@
-# سوق الدراجات — Bike Market
+# Ride iQ — سوق الدراجات
 
-A full-stack Arabic/English bike marketplace for Saudi Arabia, where users can buy and sell bikes with direct phone contact.
+A full-stack Arabic bike marketplace for Saudi Arabia, branded as "Ride iQ", inspired by iqcars.net layout with a distinct navy-blue identity. Users buy and sell bikes with direct phone/WhatsApp contact.
 
 ## Architecture
 
@@ -21,14 +21,14 @@ A full-stack Arabic/English bike marketplace for Saudi Arabia, where users can b
 
 ## Features
 
-- **Homepage** — Arabic hero, search, category browse, recent listings, trust section
-- **Listings** — Search/filter by category, condition, price range
+- **Homepage** — iqcars-style: dark navy hero, search card with bike-type picker, filters, featured listings grid
+- **Listings** — Search/filter by category, condition, price range with iqcars-style cards
 - **Bike Detail** — Full info, Call Seller button, WhatsApp button, favorites
 - **Sell** — Create listing form with image URL, phone number
 - **My Listings** — View/delete own listings, mark as sold
 - **Favorites** — Save bikes for later
 - **Admin Dashboard** — Stats overview, approve/reject/mark-sold listings, user list
-- **Auth** — Clerk sign-in/sign-up with branded UI (orange theme, SVG logo)
+- **Auth** — Clerk sign-in/sign-up with branded UI (blue theme, SVG logo)
 
 ## Database Schema (`lib/db/src/schema/bikes.ts`)
 
@@ -75,6 +75,8 @@ Both workflows run automatically:
 
 ## Design
 
-- **Theme**: Warm amber/orange (`hsl(25, 95%, 50%)`) on light cream background
-- **Language**: Arabic primary (RTL text), English labels
+- **Brand**: Ride iQ — wheel SVG logo, `ride` text + `iQ` blue badge
+- **Theme**: Deep navy (#0D1B35) + vibrant blue (hsl 213 88% 50%) on light gray background
+- **Language**: Arabic (RTL), English brand name "Ride iQ"
 - **Currency**: SAR (Saudi Riyal)
+- **Layout**: iqcars.net-inspired — sticky white navbar, dark hero with search card, category picker, filter dropdowns, iqcars-style listing cards with price overlay badges

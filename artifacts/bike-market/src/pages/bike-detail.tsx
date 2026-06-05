@@ -26,7 +26,7 @@ export default function BikeDetailPage() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const bikeId = parseInt(id || "0");
-  const { data: bike, isLoading } = useGetBike(bikeId, { query: { enabled: !!bikeId } });
+  const { data: bike, isLoading } = useGetBike(bikeId, { query: { enabled: !!bikeId } } as any);
   const addFav = useAddFavorite();
   const removeFav = useRemoveFavorite();
 

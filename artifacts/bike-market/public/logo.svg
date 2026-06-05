@@ -1,8 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
-  <circle cx="18" cy="28" r="10" stroke="#f97316" stroke-width="3"/>
-  <circle cx="62" cy="28" r="10" stroke="#f97316" stroke-width="3"/>
-  <path d="M18 28 L30 12 L50 12 L62 28" stroke="#f97316" stroke-width="3" stroke-linejoin="round" fill="none"/>
-  <path d="M30 12 L40 28" stroke="#f97316" stroke-width="3"/>
-  <text x="76" y="30" font-family="Inter, sans-serif" font-weight="700" font-size="14" fill="#1c1008">سوق</text>
-  <text x="76" y="14" font-family="Inter, sans-serif" font-weight="500" font-size="9" fill="#f97316">BIKE MARKET</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 44" fill="none">
+  <circle cx="22" cy="22" r="16" stroke="#0066FF" stroke-width="2.5"/>
+  <circle cx="22" cy="22" r="3.5" fill="#0066FF"/>
+  <line x1="22" y1="6" x2="22" y2="38" stroke="#0066FF" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="6" y1="22" x2="38" y2="22" stroke="#0066FF" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="10.7" y1="10.7" x2="33.3" y2="33.3" stroke="#0066FF" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="33.3" y1="10.7" x2="10.7" y2="33.3" stroke="#0066FF" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="46" y="30" font-family="Cairo, sans-serif" font-size="20" font-weight="700" fill="#0D1B35">ride</text>
+  <rect x="98" y="10" width="40" height="26" rx="5" fill="#0066FF"/>
+  <text x="118" y="29" font-family="Cairo, sans-serif" font-size="17" font-weight="800" fill="white" text-anchor="middle">iQ</text>
 </svg>
