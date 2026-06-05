@@ -8,41 +8,79 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function BikeCTAIllustration() {
   return (
-    <svg viewBox="0 0 220 130" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* Back wheel */}
-      <circle cx="58" cy="92" r="32" stroke="rgba(255,255,255,0.25)" strokeWidth="3.5"/>
-      <circle cx="58" cy="92" r="5" fill="rgba(99,179,255,0.8)"/>
-      <line x1="58" y1="60" x2="58" y2="124" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="26" y1="92" x2="90" y2="92" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="35" y1="69" x2="81" y2="115" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="81" y1="69" x2="35" y2="115" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      {/* Front wheel */}
-      <circle cx="162" cy="92" r="32" stroke="rgba(255,255,255,0.25)" strokeWidth="3.5"/>
-      <circle cx="162" cy="92" r="5" fill="rgba(99,179,255,0.8)"/>
-      <line x1="162" y1="60" x2="162" y2="124" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="130" y1="92" x2="194" y2="92" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="139" y1="69" x2="185" y2="115" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <line x1="185" y1="69" x2="139" y2="115" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      {/* Frame */}
-      <path d="M58 92 L100 48 L140 58 L162 92" stroke="rgba(99,179,255,0.9)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <path d="M100 48 L110 92" stroke="rgba(99,179,255,0.9)" strokeWidth="4" strokeLinecap="round"/>
-      {/* Seat post */}
-      <path d="M100 48 L95 35" stroke="rgba(255,255,255,0.7)" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M88 35 L104 35" stroke="rgba(255,255,255,0.7)" strokeWidth="3" strokeLinecap="round"/>
-      {/* Fork & handlebar */}
-      <path d="M140 58 L148 38" stroke="rgba(255,255,255,0.7)" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M141 38 L158 34" stroke="rgba(255,255,255,0.7)" strokeWidth="3" strokeLinecap="round"/>
-      {/* Rider silhouette */}
-      <circle cx="110" cy="22" r="9" fill="rgba(255,255,255,0.75)"/>
-      <path d="M110 31 L104 50 L118 60 L128 46 L120 34 Z" fill="rgba(255,255,255,0.65)"/>
-      <path d="M104 50 L90 58" stroke="rgba(255,255,255,0.65)" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M90 58 L94 66" stroke="rgba(255,255,255,0.65)" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M118 60 L114 76" stroke="rgba(255,255,255,0.65)" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M118 60 L126 72" stroke="rgba(255,255,255,0.65)" strokeWidth="3" strokeLinecap="round"/>
-      {/* Speed lines */}
-      <line x1="2" y1="55" x2="28" y2="55" stroke="rgba(99,179,255,0.4)" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="8" y1="66" x2="24" y2="66" stroke="rgba(99,179,255,0.3)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="4" y1="77" x2="20" y2="77" stroke="rgba(99,179,255,0.2)" strokeWidth="1" strokeLinecap="round"/>
+    <svg viewBox="0 0 370 118" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+
+      {/* ===== BICYCLE (left) ===== */}
+      <circle cx="40" cy="90" r="23" stroke="rgba(255,255,255,0.22)" strokeWidth="3"/>
+      <circle cx="40" cy="90" r="5" fill="rgba(99,179,255,0.7)"/>
+      <line x1="40" y1="67" x2="40" y2="113" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <line x1="17" y1="90" x2="63" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <circle cx="108" cy="90" r="23" stroke="rgba(255,255,255,0.22)" strokeWidth="3"/>
+      <circle cx="108" cy="90" r="5" fill="rgba(99,179,255,0.7)"/>
+      <line x1="108" y1="67" x2="108" y2="113" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <line x1="85" y1="90" x2="131" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      {/* frame */}
+      <path d="M40 90 L66 52 L96 60 L108 90" stroke="rgba(99,179,255,0.85)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M66 52 L74 90" stroke="rgba(99,179,255,0.75)" strokeWidth="3" strokeLinecap="round"/>
+      {/* seat */}
+      <path d="M61 52 L74 52" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M67 52 L67 44" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round"/>
+      {/* handlebar */}
+      <path d="M96 60 L100 48 L109 46 L111 50" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* label */}
+      <text x="74" y="113" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)" fontFamily="Cairo,sans-serif">هوائية</text>
+
+      {/* ===== ELECTRIC BIKE (center) ===== */}
+      <circle cx="163" cy="90" r="23" stroke="rgba(255,255,255,0.22)" strokeWidth="3"/>
+      <circle cx="163" cy="90" r="5" fill="rgba(99,179,255,0.7)"/>
+      <line x1="163" y1="67" x2="163" y2="113" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <line x1="140" y1="90" x2="186" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <circle cx="231" cy="90" r="23" stroke="rgba(255,255,255,0.22)" strokeWidth="3"/>
+      <circle cx="231" cy="90" r="5" fill="rgba(99,179,255,0.7)"/>
+      <line x1="231" y1="67" x2="231" y2="113" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      <line x1="208" y1="90" x2="254" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+      {/* frame */}
+      <path d="M163 90 L189 52 L219 60 L231 90" stroke="rgba(99,179,255,0.85)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M189 52 L197 90" stroke="rgba(99,179,255,0.75)" strokeWidth="3" strokeLinecap="round"/>
+      {/* seat */}
+      <path d="M184 52 L197 52" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M190 52 L190 44" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round"/>
+      {/* handlebar */}
+      <path d="M219 60 L223 48 L232 46 L234 50" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* battery pack on down tube */}
+      <rect x="177" y="66" width="18" height="8" rx="2" fill="rgba(99,179,255,0.5)" stroke="rgba(99,179,255,0.85)" strokeWidth="1.2"/>
+      <rect x="195" y="68" width="3" height="4" rx="1" fill="rgba(99,179,255,0.85)"/>
+      {/* lightning bolt */}
+      <path d="M205 36 L199 48 L204 46 L198 60" stroke="rgba(255,220,50,0.95)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* label */}
+      <text x="197" y="113" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)" fontFamily="Cairo,sans-serif">كهربائية</text>
+
+      {/* ===== MOTORCYCLE (right) ===== */}
+      <circle cx="292" cy="90" r="26" stroke="rgba(255,255,255,0.28)" strokeWidth="5"/>
+      <circle cx="292" cy="90" r="6" fill="rgba(99,179,255,0.8)"/>
+      <line x1="292" y1="64" x2="292" y2="116" stroke="rgba(255,255,255,0.1)" strokeWidth="2"/>
+      <line x1="266" y1="90" x2="318" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="2"/>
+      <circle cx="354" cy="90" r="26" stroke="rgba(255,255,255,0.28)" strokeWidth="5"/>
+      <circle cx="354" cy="90" r="6" fill="rgba(99,179,255,0.8)"/>
+      <line x1="354" y1="64" x2="354" y2="116" stroke="rgba(255,255,255,0.1)" strokeWidth="2"/>
+      <line x1="328" y1="90" x2="380" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="2"/>
+      {/* engine block */}
+      <rect x="302" y="68" width="28" height="18" rx="3" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" strokeWidth="1.8"/>
+      {/* frame */}
+      <path d="M292 90 L304 62 L326 58 L330 68 L354 90" stroke="rgba(99,179,255,0.9)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M304 62 L304 86" stroke="rgba(99,179,255,0.6)" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* seat */}
+      <path d="M304 62 L324 58" stroke="rgba(255,255,255,0.85)" strokeWidth="4" strokeLinecap="round"/>
+      {/* handlebar (high) */}
+      <path d="M326 58 L330 45 L340 43 M330 45 L323 43" stroke="rgba(255,255,255,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* exhaust pipe */}
+      <path d="M330 80 L346 83 L356 80" stroke="rgba(255,180,80,0.55)" strokeWidth="2" strokeLinecap="round"/>
+      {/* label */}
+      <text x="323" y="113" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.4)" fontFamily="Cairo,sans-serif">نارية</text>
+
+      {/* speed lines (far left) */}
+      <line x1="2" y1="62" x2="22" y2="62" stroke="rgba(99,179,255,0.35)" strokeWidth="2" strokeLinecap="round"/>
+      <line x1="6" y1="72" x2="20" y2="72" stroke="rgba(99,179,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }

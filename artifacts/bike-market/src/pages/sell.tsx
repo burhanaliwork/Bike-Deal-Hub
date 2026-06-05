@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useLocation, Redirect } from "wouter";
-import { Show } from "@clerk/react";
+import { useLocation } from "wouter";
 import { useCreateBike, getListBikesQueryKey, getGetMyBikesQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -65,10 +64,6 @@ export default function SellPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Show when="signed-out">
-        <Redirect to="/sign-in" />
-      </Show>
-
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-black text-foreground mb-2">بيع دراجتك</h1>
@@ -143,7 +138,7 @@ export default function SellPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="price">السعر (ر.س) <span className="text-red-500">*</span></Label>
+                <Label htmlFor="price">السعر ($) <span className="text-red-500">*</span></Label>
                 <div className="relative">
                   <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input

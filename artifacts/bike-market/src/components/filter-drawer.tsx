@@ -10,12 +10,11 @@ interface FilterDrawerProps {
   onClose: () => void;
 }
 
-type BikeMainType = "all" | "bicycle" | "electric" | "motorcycle";
+type BikeMainType = "bicycle" | "electric" | "motorcycle";
 type Condition = "all" | "new" | "used";
 type Documents = "all" | "with" | "without";
 
-const mainTypes: { value: BikeMainType; label: string; sub?: string }[] = [
-  { value: "all", label: "الكل" },
+const mainTypes: { value: BikeMainType; label: string }[] = [
   { value: "bicycle", label: "دراجات هوائية" },
   { value: "electric", label: "دراجات كهربائية" },
   { value: "motorcycle", label: "دراجات نارية" },
@@ -23,7 +22,7 @@ const mainTypes: { value: BikeMainType; label: string; sub?: string }[] = [
 
 export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [, navigate] = useLocation();
-  const [mainType, setMainType] = useState<BikeMainType>("all");
+  const [mainType, setMainType] = useState<BikeMainType | "">("");
   const [condition, setCondition] = useState<Condition>("all");
   const [documents, setDocuments] = useState<Documents>("all");
   const [minPrice, setMinPrice] = useState("");
@@ -32,6 +31,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [maxOdo, setMaxOdo] = useState("");
 
   const showOdometer = mainType === "electric" || mainType === "motorcycle";
+  const showDocuments = mainType === "motorcycle";
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -43,8 +43,10 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     if (condition === "new") params.set("condition", "new");
     else if (condition === "used") params.set("condition", "used");
 
-    if (documents === "with") params.set("documents", "with");
-    else if (documents === "without") params.set("documents", "without");
+    if (showDocuments) {
+      if (documents === "with") params.set("documents", "with");
+      else if (documents === "without") params.set("documents", "without");
+    }
 
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
@@ -59,7 +61,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   };
 
   const handleClear = () => {
-    setMainType("all");
+    setMainType("");
     setCondition("all");
     setDocuments("all");
     setMinPrice("");
@@ -100,13 +102,13 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
           {/* نوع الدراجة */}
           <div>
             <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نوع الدراجة</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               {mainTypes.map((t) => (
                 <button
                   key={t.value}
                   onClick={() => setMainType(t.value)}
                   className={cn(
-                    "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all",
+                    "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all text-right",
                     mainType === t.value
                       ? "border-primary bg-primary text-white"
                       : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
@@ -143,34 +145,36 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
             </div>
           </div>
 
-          {/* الأوراق الرسمية */}
-          <div>
-            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">الأوراق الرسمية</h3>
-            <div className="flex gap-2">
-              {[
-                { value: "all" as Documents, label: "الكل" },
-                { value: "with" as Documents, label: "مع أوراق" },
-                { value: "without" as Documents, label: "بدون أوراق" },
-              ].map((d) => (
-                <button
-                  key={d.value}
-                  onClick={() => setDocuments(d.value)}
-                  className={cn(
-                    "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
-                    documents === d.value
-                      ? "border-primary bg-primary text-white"
-                      : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
-                  )}
-                >
-                  {d.label}
-                </button>
-              ))}
+          {/* الأوراق الرسمية — فقط للدراجات النارية */}
+          {showDocuments && (
+            <div>
+              <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">الأوراق الرسمية</h3>
+              <div className="flex gap-2">
+                {[
+                  { value: "all" as Documents, label: "الكل" },
+                  { value: "with" as Documents, label: "مع أوراق" },
+                  { value: "without" as Documents, label: "بدون أوراق" },
+                ].map((d) => (
+                  <button
+                    key={d.value}
+                    onClick={() => setDocuments(d.value)}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
+                      documents === d.value
+                        ? "border-primary bg-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                    )}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* السعر */}
           <div>
-            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نطاق السعر (ر.س)</h3>
+            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نطاق السعر ($)</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">أقل سعر</label>

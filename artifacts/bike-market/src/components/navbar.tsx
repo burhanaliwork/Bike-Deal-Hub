@@ -1,14 +1,11 @@
-import { Link, useLocation } from "wouter";
-import { Show, useUser, useClerk } from "@clerk/react";
-import { PlusCircle, SlidersHorizontal, Bike, LogIn, LogOut } from "lucide-react";
+import { Link } from "wouter";
+import { SlidersHorizontal, Bike } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import FilterDrawer from "@/components/filter-drawer";
 
 export default function Navbar() {
   const [filterOpen, setFilterOpen] = useState(false);
-  const { signOut } = useClerk();
-  const { user } = useUser();
 
   return (
     <>
@@ -40,35 +37,10 @@ export default function Navbar() {
                 </Button>
               </Link>
 
-              {/* Divider */}
-              <span className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
-
-              {/* Auth */}
-              <Show when="signed-out">
-                <Link href="/sign-in">
-                  <Button variant="ghost" size="sm" className="gap-1.5 text-gray-500 hover:text-primary hidden sm:flex">
-                    <LogIn className="w-4 h-4" />
-                    دخول
-                  </Button>
-                </Link>
-              </Show>
-              <Show when="signed-in">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-gray-400 hover:text-red-500 hidden sm:flex"
-                  onClick={() => signOut()}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden md:inline">خروج</span>
-                </Button>
-              </Show>
-
-              {/* Sell button */}
+              {/* Add listing button */}
               <Link href="/sell">
-                <Button size="sm" className="gap-1.5 bg-[#0D1B35] hover:bg-[#1a2d55] text-white font-semibold px-3 sm:px-4">
-                  <PlusCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">بيع دراجتك</span>
+                <Button size="sm" className="bg-[#0D1B35] hover:bg-[#1a2d55] text-white font-semibold px-4">
+                  أضف إعلانك
                 </Button>
               </Link>
             </div>

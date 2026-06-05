@@ -1,5 +1,4 @@
-import { Link, Redirect } from "wouter";
-import { Show } from "@clerk/react";
+import { Link } from "wouter";
 import { useGetFavorites } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import BikeCard from "@/components/bike-card";
@@ -13,10 +12,6 @@ export default function FavoritesPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Show when="signed-out">
-        <Redirect to="/sign-in" />
-      </Show>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-black text-foreground flex items-center gap-3 mb-1">
