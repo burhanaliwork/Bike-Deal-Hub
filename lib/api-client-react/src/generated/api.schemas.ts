@@ -22,6 +22,11 @@ export interface Bike {
   phone: string;
   images?: string[];
   mileage?: number;
+  /** motorcycle engine capacity in cc */
+  engineCapacity?: number;
+  /** one of the 18 Iraqi governorates */
+  province?: string;
+  hasDelivery?: boolean;
   /** active, pending, sold, rejected */
   status: string;
   userId: string;
@@ -42,6 +47,9 @@ export interface CreateBikeBody {
   phone: string;
   images?: string[];
   mileage?: number;
+  engineCapacity?: number;
+  province: string;
+  hasDelivery?: boolean;
 }
 
 export interface UpdateBikeBody {
@@ -54,6 +62,9 @@ export interface UpdateBikeBody {
   phone?: string;
   images?: string[];
   mileage?: number;
+  engineCapacity?: number;
+  province?: string;
+  hasDelivery?: boolean;
 }
 
 export interface UpdateBikeStatusBody {
@@ -131,4 +142,6 @@ export type ListBikesParams = {
   status?: string;
   minMileage?: number;
   maxMileage?: number;
+  province?: string;
+  hasDelivery?: boolean;
 };

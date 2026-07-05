@@ -16,6 +16,8 @@ export default function ListingsPage() {
   const maxPrice = params.get("maxPrice") || "";
   const minMileage = params.get("minMileage") || "";
   const maxMileage = params.get("maxMileage") || "";
+  const province = params.get("province") || "";
+  const hasDelivery = params.get("hasDelivery") || "";
 
   const { data: bikes, isLoading } = useListBikes({
     ...(search && { search }),
@@ -25,6 +27,8 @@ export default function ListingsPage() {
     ...(maxPrice && { maxPrice: parseFloat(maxPrice) }),
     ...(minMileage && { minMileage: parseFloat(minMileage) }),
     ...(maxMileage && { maxMileage: parseFloat(maxMileage) }),
+    ...(province && { province }),
+    ...(hasDelivery && { hasDelivery: hasDelivery === "true" }),
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -41,7 +45,6 @@ export default function ListingsPage() {
         <form onSubmit={handleSearch} className="relative mb-6">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="ابحث عن دراجة..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pr-9 h-11"

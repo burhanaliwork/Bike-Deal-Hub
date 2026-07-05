@@ -26,6 +26,8 @@ export const ListBikesQueryParams = zod.object({
   status: zod.coerce.string().optional(),
   minMileage: zod.coerce.number().optional(),
   maxMileage: zod.coerce.number().optional(),
+  province: zod.coerce.string().optional(),
+  hasDelivery: zod.coerce.boolean().optional(),
 });
 
 export const ListBikesResponseItem = zod.object({
@@ -43,6 +45,15 @@ export const ListBikesResponseItem = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -66,6 +77,9 @@ export const CreateBikeBody = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod.number().optional(),
+  province: zod.string(),
+  hasDelivery: zod.boolean().optional(),
 });
 
 /**
@@ -90,6 +104,15 @@ export const GetBikeResponse = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -116,6 +139,9 @@ export const UpdateBikeBody = zod.object({
   phone: zod.string().optional(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod.number().optional(),
+  province: zod.string().optional(),
+  hasDelivery: zod.boolean().optional(),
 });
 
 export const UpdateBikeResponse = zod.object({
@@ -133,6 +159,15 @@ export const UpdateBikeResponse = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -167,6 +202,15 @@ export const GetMyBikesResponseItem = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -206,6 +250,15 @@ export const GetBikeStatsResponse = zod.object({
       phone: zod.string(),
       images: zod.array(zod.string()).optional(),
       mileage: zod.number().optional(),
+      engineCapacity: zod
+        .number()
+        .optional()
+        .describe("motorcycle engine capacity in cc"),
+      province: zod
+        .string()
+        .optional()
+        .describe("one of the 18 Iraqi governorates"),
+      hasDelivery: zod.boolean().optional(),
       status: zod.string().describe("active, pending, sold, rejected"),
       userId: zod.string(),
       userName: zod.string().optional(),
@@ -235,6 +288,15 @@ export const GetFavoritesResponseItem = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -291,6 +353,15 @@ export const AdminListBikesResponseItem = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -327,6 +398,15 @@ export const AdminUpdateBikeStatusResponse = zod.object({
   phone: zod.string(),
   images: zod.array(zod.string()).optional(),
   mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),

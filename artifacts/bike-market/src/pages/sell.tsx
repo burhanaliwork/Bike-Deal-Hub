@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Bike, Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2 } from "lucide-react";
+import { Bike, Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2, MapPin, Truck, Cog } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IRAQ_PROVINCES } from "@/lib/provinces";
 
 type MainType = "electric" | "motorcycle" | "bicycle";
 
@@ -47,6 +49,9 @@ export default function SellPage() {
     condition: "",
     brand: "",
     mileage: "",
+    engineCapacity: "",
+    province: "",
+    hasDelivery: false,
     phone: "",
   });
 
@@ -70,7 +75,7 @@ export default function SellPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.price || !resolvedCategory || !form.condition || !form.phone) {
+    if (!form.title || !form.price || !resolvedCategory || !form.condition || !form.province || !form.phone) {
       toast({ title: "الرجاء تعبئة جميع الحقول المطلوبة", variant: "destructive" });
       return;
     }
@@ -94,7 +99,10 @@ export default function SellPage() {
           brand: form.brand || undefined,
           phone: form.phone,
           images,
+          province: form.province,
+          hasDelivery: form.hasDelivery,
           ...(mainType === "motorcycle" && form.mileage ? { mileage: parseInt(form.mileage) } : {}),
+          ...(mainType === "motorcycle" && form.engineCapacity ? { engineCapacity: parseInt(form.engineCapacity) } : {}),
         },
       },
       {
@@ -136,7 +144,7 @@ export default function SellPage() {
                     onClick={() => {
                       setMainType(t.value);
                       if (t.value !== "bicycle") setBicycleCategory("");
-                      if (t.value !== "motorcycle") setForm((f) => ({ ...f, mileage: "" }));
+                      if (t.value !== "motorcycle") setForm((f) => ({ ...f, mileage: "", engineCapacity: "" }));
                     }}
                     className={cn(
                       "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all",
@@ -175,10 +183,9 @@ export default function SellPage() {
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="title">العنوان <span className="text-red-500">*</span></Label>
+              <Label htmlFor="title">اسم الدراجة <span className="text-red-500">*</span></Label>
               <Input
                 id="title"
-                placeholder="مثال: دراجة جبلية ترك 2022 — مقاس 26"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
@@ -217,7 +224,6 @@ export default function SellPage() {
                   <Input
                     id="price"
                     type="number"
-                    placeholder="0"
                     className="pr-9"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -230,12 +236,11 @@ export default function SellPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="brand">شركة الدراجة</Label>
+                <Label htmlFor="brand">اسم شركة الدراجة</Label>
                 <div className="relative">
                   <Tag className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="brand"
-                    placeholder="ترك، جاينت، هوندا..."
                     className="pr-9"
                     value={form.brand}
                     onChange={(e) => setForm({ ...form, brand: e.target.value })}
@@ -243,7 +248,28 @@ export default function SellPage() {
                 </div>
               </div>
 
-              {mainType === "motorcycle" && (
+              <div className="space-y-1.5">
+                <Label>العنوان <span className="text-red-500">*</span></Label>
+                <div className="relative">
+                  <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                  <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })}>
+                    <SelectTrigger className="pr-9">
+                      <SelectValue placeholder="اختر المحافظة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {IRAQ_PROVINCES.map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {mainType === "motorcycle" && (
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="mileage">الممشى (كم)</Label>
                   <div className="relative">
@@ -251,7 +277,6 @@ export default function SellPage() {
                     <Input
                       id="mileage"
                       type="number"
-                      placeholder="0"
                       className="pr-9"
                       value={form.mileage}
                       onChange={(e) => setForm({ ...form, mileage: e.target.value })}
@@ -259,7 +284,47 @@ export default function SellPage() {
                     />
                   </div>
                 </div>
-              )}
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="engineCapacity">سعة المحرك (سي سي)</Label>
+                  <div className="relative">
+                    <Cog className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="engineCapacity"
+                      type="number"
+                      className="pr-9"
+                      value={form.engineCapacity}
+                      onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })}
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label>هل يتوفر توصيل؟</Label>
+              <div className="flex gap-2">
+                {[
+                  { value: true, label: "متوفر" },
+                  { value: false, label: "غير متوفر" },
+                ].map((d) => (
+                  <button
+                    type="button"
+                    key={String(d.value)}
+                    onClick={() => setForm({ ...form, hasDelivery: d.value })}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
+                      form.hasDelivery === d.value
+                        ? "border-primary bg-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                    )}
+                  >
+                    <Truck className="w-4 h-4" />
+                    {d.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -268,7 +333,6 @@ export default function SellPage() {
                 <FileText className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
                 <Textarea
                   id="description"
-                  placeholder="صف الدراجة — المقاس، السنة، الإكسسوارات، سبب البيع..."
                   className="pr-9 min-h-[100px]"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -329,7 +393,6 @@ export default function SellPage() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="07XXXXXXXXX"
                   className="pr-9 text-lg font-medium"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}

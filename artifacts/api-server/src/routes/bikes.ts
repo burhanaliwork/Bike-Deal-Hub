@@ -55,7 +55,7 @@ router.get("/bikes", async (req: any, res: any) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
-    const { category, condition, minPrice, maxPrice, minMileage, maxMileage, search, status } = req.query;
+    const { category, condition, minPrice, maxPrice, minMileage, maxMileage, province, hasDelivery, search, status } = req.query;
 
     const conditions: any[] = [];
     if (status) {
@@ -69,6 +69,8 @@ router.get("/bikes", async (req: any, res: any) => {
     if (maxPrice) conditions.push(lte(bikesTable.price, maxPrice as string));
     if (minMileage) conditions.push(gte(bikesTable.mileage, parseInt(minMileage as string)));
     if (maxMileage) conditions.push(lte(bikesTable.mileage, parseInt(maxMileage as string)));
+    if (province) conditions.push(eq(bikesTable.province, province as string));
+    if (hasDelivery !== undefined) conditions.push(eq(bikesTable.hasDelivery, hasDelivery === "true"));
     if (search) conditions.push(ilike(bikesTable.title, `%${search}%`));
 
     const bikes = await db
@@ -100,8 +102,8 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
 
     await upsertUser(userId, userName, userEmail);
 
-    const { title, description, price, category, condition, brand, phone, images, mileage } = req.body;
-    if (!title || !price || !category || !condition || !phone) {
+    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery } = req.body;
+    if (!title || !price || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -117,6 +119,9 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
         phone,
         images,
         mileage: mileage !== undefined && mileage !== null ? parseInt(mileage) : undefined,
+        engineCapacity: engineCapacity !== undefined && engineCapacity !== null ? parseInt(engineCapacity) : undefined,
+        province,
+        hasDelivery: !!hasDelivery,
         status: "active",
         userId,
         userName,
@@ -219,7 +224,7 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
     if (!existing) return res.status(404).json({ error: "Not found" });
     if (existing.userId !== userId) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, images, mileage } = req.body;
+    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery } = req.body;
     const [updated] = await db
       .update(bikesTable)
       .set({
@@ -232,6 +237,9 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
         ...(phone && { phone }),
         ...(images !== undefined && { images }),
         ...(mileage !== undefined && { mileage: mileage !== null ? parseInt(mileage) : null }),
+        ...(engineCapacity !== undefined && { engineCapacity: engineCapacity !== null ? parseInt(engineCapacity) : null }),
+        ...(province !== undefined && { province }),
+        ...(hasDelivery !== undefined && { hasDelivery: !!hasDelivery }),
         updatedAt: new Date(),
       })
       .where(eq(bikesTable.id, id))

@@ -70,6 +70,14 @@ paths:
           in: query
           schema:
             type: number
+        - name: province
+          in: query
+          schema:
+            type: string
+        - name: hasDelivery
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: List of bikes
@@ -434,6 +442,14 @@ components:
             type: string
         mileage:
           type: number
+        engineCapacity:
+          type: number
+          description: "motorcycle engine capacity in cc"
+        province:
+          type: string
+          description: "one of the 18 Iraqi governorates"
+        hasDelivery:
+          type: boolean
         status:
           type: string
           description: "active, pending, sold, rejected"
@@ -485,12 +501,19 @@ components:
             type: string
         mileage:
           type: number
+        engineCapacity:
+          type: number
+        province:
+          type: string
+        hasDelivery:
+          type: boolean
       required:
         - title
         - price
         - category
         - condition
         - phone
+        - province
 
     UpdateBikeBody:
       type: object
@@ -515,6 +538,12 @@ components:
             type: string
         mileage:
           type: number
+        engineCapacity:
+          type: number
+        province:
+          type: string
+        hasDelivery:
+          type: boolean
 
     UpdateBikeStatusBody:
       type: object

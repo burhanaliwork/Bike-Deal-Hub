@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { X, SlidersHorizontal, Search } from "lucide-react";
+import { X, SlidersHorizontal, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { IRAQ_PROVINCES } from "@/lib/provinces";
 
 interface FilterDrawerProps {
   open: boolean;
@@ -13,6 +15,7 @@ interface FilterDrawerProps {
 type BikeMainType = "bicycle" | "electric" | "motorcycle";
 type Condition = "all" | "new" | "used";
 type Documents = "all" | "with" | "without";
+type Delivery = "all" | "yes" | "no";
 
 const mainTypes: { value: BikeMainType; label: string }[] = [
   { value: "bicycle", label: "دراجات هوائية" },
@@ -33,6 +36,8 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState<Condition>("all");
   const [documents, setDocuments] = useState<Documents>("all");
+  const [province, setProvince] = useState("");
+  const [delivery, setDelivery] = useState<Delivery>("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [minMileage, setMinMileage] = useState("");
@@ -58,6 +63,10 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
       else if (documents === "without") params.set("documents", "without");
     }
 
+    if (province) params.set("province", province);
+    if (delivery === "yes") params.set("hasDelivery", "true");
+    else if (delivery === "no") params.set("hasDelivery", "false");
+
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
 
@@ -75,6 +84,8 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     setCategory("");
     setCondition("all");
     setDocuments("all");
+    setProvince("");
+    setDelivery("all");
     setMinPrice("");
     setMaxPrice("");
     setMinMileage("");
@@ -218,7 +229,6 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                   <label className="text-xs text-gray-400 block mb-1">أقل ممشى</label>
                   <Input
                     type="number"
-                    placeholder="0"
                     value={minMileage}
                     onChange={(e) => setMinMileage(e.target.value)}
                     className="h-10 border-gray-200 text-sm"
@@ -228,7 +238,6 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                   <label className="text-xs text-gray-400 block mb-1">أعلى ممشى</label>
                   <Input
                     type="number"
-                    placeholder="غير محدد"
                     value={maxMileage}
                     onChange={(e) => setMaxMileage(e.target.value)}
                     className="h-10 border-gray-200 text-sm"
@@ -238,6 +247,49 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
             </div>
           )}
 
+          {/* العنوان */}
+          <div>
+            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">العنوان</h3>
+            <Select value={province} onValueChange={setProvince}>
+              <SelectTrigger className="h-10 border-gray-200 text-sm">
+                <SelectValue placeholder="كل المحافظات" />
+              </SelectTrigger>
+              <SelectContent>
+                {IRAQ_PROVINCES.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* التوصيل */}
+          <div>
+            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">التوصيل</h3>
+            <div className="flex gap-2">
+              {[
+                { value: "all" as Delivery, label: "الكل" },
+                { value: "yes" as Delivery, label: "متوفر" },
+                { value: "no" as Delivery, label: "غير متوفر" },
+              ].map((d) => (
+                <button
+                  key={d.value}
+                  onClick={() => setDelivery(d.value)}
+                  className={cn(
+                    "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
+                    delivery === d.value
+                      ? "border-primary bg-primary text-white"
+                      : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                  )}
+                >
+                  {d.value !== "all" && <Truck className="w-3.5 h-3.5" />}
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* السعر */}
           <div>
             <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نطاق السعر (الدينار العراقي)</h3>
@@ -246,7 +298,6 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                 <label className="text-xs text-gray-400 block mb-1">أقل سعر</label>
                 <Input
                   type="number"
-                  placeholder="0"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   className="h-10 border-gray-200 text-sm"
@@ -256,7 +307,6 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                 <label className="text-xs text-gray-400 block mb-1">أعلى سعر</label>
                 <Input
                   type="number"
-                  placeholder="غير محدد"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   className="h-10 border-gray-200 text-sm"
