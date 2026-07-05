@@ -197,7 +197,7 @@ export default function SellPage() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="05XXXXXXXX"
+                  placeholder="07XXXXXXXXX"
                   className="pr-9 text-lg font-medium"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}

@@ -92,7 +92,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
           </button>
           <h2 className="font-bold text-[#0D1B35] text-lg flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-primary" />
-            فرز الدراجات
+            بحث عن دراجة
           </h2>
         </div>
 

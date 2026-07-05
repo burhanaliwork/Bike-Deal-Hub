@@ -104,8 +104,8 @@ export default function HomePage() {
               انشر إعلانك خلال دقيقتين وتواصل مع المشترين مباشرة.
             </p>
             <Link href="/sell">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold px-5 h-9">
-                أضف إعلانك الآن
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold px-5 h-9 transition-all duration-300 ease-out">
+                بيع دراجتك الآن
               </Button>
             </Link>
           </div>

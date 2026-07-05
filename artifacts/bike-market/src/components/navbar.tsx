@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { SlidersHorizontal, Bike } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import FilterDrawer from "@/components/filter-drawer";
@@ -15,32 +15,21 @@ export default function Navbar() {
 
             {/* Left side — actions */}
             <div className="flex items-center gap-2">
-              {/* Filter button */}
+              {/* Search / filter button */}
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 border-gray-200 text-gray-700 hover:border-primary hover:text-primary font-semibold"
+                className="gap-1.5 border-gray-200 text-gray-700 hover:border-primary hover:text-primary font-semibold transition-all duration-300 ease-out"
                 onClick={() => setFilterOpen(true)}
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                فرز
+                <Search className="w-4 h-4" />
+                بحث
               </Button>
-
-              {/* Browse bikes button */}
-              <Link href="/listings">
-                <Button
-                  size="sm"
-                  className="gap-1.5 bg-primary hover:bg-primary/90 text-white font-semibold"
-                >
-                  <Bike className="w-4 h-4" />
-                  عرض الدراجة
-                </Button>
-              </Link>
 
               {/* Add listing button */}
               <Link href="/sell">
-                <Button size="sm" className="bg-[#0D1B35] hover:bg-[#1a2d55] text-white font-semibold px-4">
-                  أضف إعلانك
+                <Button size="sm" className="bg-[#0D1B35] hover:bg-[#1a2d55] text-white font-semibold px-4 transition-all duration-300 ease-out">
+                  بيع دراجتك
                 </Button>
               </Link>
             </div>

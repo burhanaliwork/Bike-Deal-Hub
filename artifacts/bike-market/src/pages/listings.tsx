@@ -120,14 +120,14 @@ export default function ListingsPage() {
               </Select>
 
               <Input
-                placeholder="أقل سعر (ر.س)"
+                placeholder="أقل سعر ($)"
                 type="number"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="h-10"
               />
               <Input
-                placeholder="أعلى سعر (ر.س)"
+                placeholder="أعلى سعر ($)"
                 type="number"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}

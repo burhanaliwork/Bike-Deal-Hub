@@ -175,7 +175,7 @@ function AdminListings() {
               <StatusBadge status={bike.status} />
             </div>
             <div className="text-sm text-muted-foreground">
-              {Number(bike.price).toLocaleString()} ر.س · {bike.category} · {bike.userName || "مستخدم غير معروف"}
+              $ {Number(bike.price).toLocaleString()} · {bike.category} · {bike.userName || "مستخدم غير معروف"}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -232,7 +232,7 @@ function AdminUsers() {
           <div className="text-left flex-shrink-0">
             <div className="text-sm font-semibold text-foreground">{u.listingsCount} إعلان</div>
             <div className="text-xs text-muted-foreground">
-              {new Date(u.createdAt).toLocaleDateString("ar-SA")}
+              {new Date(u.createdAt).toLocaleDateString("ar-IQ")}
             </div>
           </div>
         </div>

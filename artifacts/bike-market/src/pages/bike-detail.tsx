@@ -172,7 +172,7 @@ export default function BikeDetailPage() {
                 {bike.createdAt && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
-                    تاريخ النشر: {new Date(bike.createdAt).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
+                    تاريخ النشر: {new Date(bike.createdAt).toLocaleDateString("ar-IQ", { year: "numeric", month: "long", day: "numeric" })}
                   </div>
                 )}
               </div>
