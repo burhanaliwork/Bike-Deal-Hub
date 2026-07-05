@@ -90,8 +90,8 @@ export default function MyListingsPage() {
               <div key={bike.id} className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-sm transition-shadow">
                 <div className="flex gap-4 p-4">
                   <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    {bike.imageUrl ? (
-                      <img src={bike.imageUrl} alt={bike.title} className="w-full h-full object-cover"
+                    {bike.images?.[0] ? (
+                      <img src={bike.images[0]} alt={bike.title} className="w-full h-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600"; }} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

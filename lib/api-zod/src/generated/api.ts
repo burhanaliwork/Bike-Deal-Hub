@@ -24,6 +24,8 @@ export const ListBikesQueryParams = zod.object({
   maxPrice: zod.coerce.number().optional(),
   search: zod.coerce.string().optional(),
   status: zod.coerce.string().optional(),
+  minMileage: zod.coerce.number().optional(),
+  maxMileage: zod.coerce.number().optional(),
 });
 
 export const ListBikesResponseItem = zod.object({
@@ -33,11 +35,14 @@ export const ListBikesResponseItem = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -59,7 +64,8 @@ export const CreateBikeBody = zod.object({
   condition: zod.string(),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
 });
 
 /**
@@ -76,11 +82,14 @@ export const GetBikeResponse = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -105,7 +114,8 @@ export const UpdateBikeBody = zod.object({
   condition: zod.string().optional(),
   brand: zod.string().optional(),
   phone: zod.string().optional(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
 });
 
 export const UpdateBikeResponse = zod.object({
@@ -115,11 +125,14 @@ export const UpdateBikeResponse = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -146,11 +159,14 @@ export const GetMyBikesResponseItem = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -182,11 +198,14 @@ export const GetBikeStatsResponse = zod.object({
       price: zod.number(),
       category: zod
         .string()
-        .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-      condition: zod.string().describe("new, like_new, good, fair"),
+        .describe(
+          "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+        ),
+      condition: zod.string().describe("new, used"),
       brand: zod.string().optional(),
       phone: zod.string(),
-      imageUrl: zod.string().optional(),
+      images: zod.array(zod.string()).optional(),
+      mileage: zod.number().optional(),
       status: zod.string().describe("active, pending, sold, rejected"),
       userId: zod.string(),
       userName: zod.string().optional(),
@@ -208,11 +227,14 @@ export const GetFavoritesResponseItem = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -261,11 +283,14 @@ export const AdminListBikesResponseItem = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -294,11 +319,14 @@ export const AdminUpdateBikeStatusResponse = zod.object({
   price: zod.number(),
   category: zod
     .string()
-    .describe("mountain, road, bmx, electric, kids, hybrid, other"),
-  condition: zod.string().describe("new, like_new, good, fair"),
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
   brand: zod.string().optional(),
   phone: zod.string(),
-  imageUrl: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -319,3 +347,64 @@ export const AdminListUsersResponseItem = zod.object({
   createdAt: zod.coerce.date(),
 });
 export const AdminListUsersResponse = zod.array(AdminListUsersResponseItem);
+
+/**
+ * Returns a presigned GCS URL for direct upload. The client sends JSON
+metadata here, then uploads the file directly to the returned URL.
+
+ * @summary Request a presigned URL for file upload
+ */
+
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string().min(1).describe("Original file name."),
+  size: zod.number().min(1).describe("File size in bytes."),
+  contentType: zod
+    .string()
+    .min(1)
+    .describe("MIME type of the file (e.g. `image\/jpeg`)."),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string().url().describe("Presigned GCS URL for PUT upload."),
+  objectPath: zod
+    .string()
+    .describe(
+      "Normalized object path (e.g. `\/objects\/uploads\/uuid`). Store this in your database.",
+    ),
+  metadata: zod
+    .object({
+      name: zod.string().min(1).describe("Original file name."),
+      size: zod.number().min(1).describe("File size in bytes."),
+      contentType: zod
+        .string()
+        .min(1)
+        .describe("MIME type of the file (e.g. `image\/jpeg`)."),
+    })
+    .optional(),
+});
+
+/**
+ * Unconditionally public — no authentication or ACL checks.
+Searches PUBLIC_OBJECT_SEARCH_PATHS for the given file path.
+
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const GetPublicObjectParams = zod.object({
+  filePath: zod.coerce
+    .string()
+    .describe("Relative file path within the public search paths."),
+});
+
+/**
+ * Serves object entities uploaded via presigned URLs. These can optionally
+be protected with authentication or ACL checks based on the use case.
+
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce
+    .string()
+    .describe(
+      "Object path within the private object dir (e.g. `uploads\/some-uuid`).",
+    ),
+});

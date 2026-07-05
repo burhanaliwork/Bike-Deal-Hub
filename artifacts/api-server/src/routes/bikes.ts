@@ -55,7 +55,7 @@ router.get("/bikes", async (req: any, res: any) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
-    const { category, condition, minPrice, maxPrice, search, status } = req.query;
+    const { category, condition, minPrice, maxPrice, minMileage, maxMileage, search, status } = req.query;
 
     const conditions: any[] = [];
     if (status) {
@@ -67,6 +67,8 @@ router.get("/bikes", async (req: any, res: any) => {
     if (condition) conditions.push(eq(bikesTable.condition, condition as string));
     if (minPrice) conditions.push(gte(bikesTable.price, minPrice as string));
     if (maxPrice) conditions.push(lte(bikesTable.price, maxPrice as string));
+    if (minMileage) conditions.push(gte(bikesTable.mileage, parseInt(minMileage as string)));
+    if (maxMileage) conditions.push(lte(bikesTable.mileage, parseInt(maxMileage as string)));
     if (search) conditions.push(ilike(bikesTable.title, `%${search}%`));
 
     const bikes = await db
@@ -98,7 +100,7 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
 
     await upsertUser(userId, userName, userEmail);
 
-    const { title, description, price, category, condition, brand, phone, imageUrl } = req.body;
+    const { title, description, price, category, condition, brand, phone, images, mileage } = req.body;
     if (!title || !price || !category || !condition || !phone) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -113,7 +115,8 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
         condition,
         brand,
         phone,
-        imageUrl,
+        images,
+        mileage: mileage !== undefined && mileage !== null ? parseInt(mileage) : undefined,
         status: "active",
         userId,
         userName,
@@ -216,7 +219,7 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
     if (!existing) return res.status(404).json({ error: "Not found" });
     if (existing.userId !== userId) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, imageUrl } = req.body;
+    const { title, description, price, category, condition, brand, phone, images, mileage } = req.body;
     const [updated] = await db
       .update(bikesTable)
       .set({
@@ -227,7 +230,8 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
         ...(condition && { condition }),
         ...(brand !== undefined && { brand }),
         ...(phone && { phone }),
-        ...(imageUrl !== undefined && { imageUrl }),
+        ...(images !== undefined && { images }),
+        ...(mileage !== undefined && { mileage: mileage !== null ? parseInt(mileage) : null }),
         updatedAt: new Date(),
       })
       .where(eq(bikesTable.id, id))

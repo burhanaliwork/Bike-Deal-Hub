@@ -14,6 +14,8 @@ export default function ListingsPage() {
   const condition = params.get("condition") || "";
   const minPrice = params.get("minPrice") || "";
   const maxPrice = params.get("maxPrice") || "";
+  const minMileage = params.get("minMileage") || "";
+  const maxMileage = params.get("maxMileage") || "";
 
   const { data: bikes, isLoading } = useListBikes({
     ...(search && { search }),
@@ -21,6 +23,8 @@ export default function ListingsPage() {
     ...(condition && { condition }),
     ...(minPrice && { minPrice: parseFloat(minPrice) }),
     ...(maxPrice && { maxPrice: parseFloat(maxPrice) }),
+    ...(minMileage && { minMileage: parseFloat(minMileage) }),
+    ...(maxMileage && { maxMileage: parseFloat(maxMileage) }),
   });
 
   const handleSearch = (e: React.FormEvent) => {

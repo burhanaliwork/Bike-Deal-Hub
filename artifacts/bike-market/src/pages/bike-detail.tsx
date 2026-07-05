@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { ArrowRight, Phone, Heart, Share2, Bike, Calendar, Tag, Zap, Mountain, Wind, Users, HelpCircle } from "lucide-react";
+import { ArrowRight, Phone, Heart, Share2, Bike, Calendar, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge } from "lucide-react";
 import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -11,13 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const categoryIcons: Record<string, any> = {
-  mountain: Mountain, road: Wind, electric: Zap, bmx: Tag, kids: Users, hybrid: Bike, other: HelpCircle,
+  mountain: Mountain, road: Wind, electric: Zap, motorcycle: Gauge, bmx: Tag, kids: Users, hybrid: Bike, other: HelpCircle,
 };
 const categoryLabels: Record<string, string> = {
-  mountain: "جبلية", road: "طريق", electric: "كهربائية", bmx: "بي إم إكس", kids: "أطفال", hybrid: "هجين", other: "أخرى",
+  mountain: "جبلية", road: "طريق", electric: "كهربائية", motorcycle: "نارية", bmx: "بي إم إكس", kids: "أطفال", hybrid: "هجين", other: "أخرى",
 };
 const conditionLabels: Record<string, string> = {
-  new: "جديدة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
+  new: "جديدة", used: "مستخدمة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
 };
 
 export default function BikeDetailPage() {
@@ -31,6 +32,7 @@ export default function BikeDetailPage() {
   const removeFav = useRemoveFavorite();
 
   const CategoryIcon = bike ? (categoryIcons[bike.category] || Bike) : Bike;
+  const [activeImage, setActiveImage] = useState(0);
 
   const handleFavoriteToggle = () => {
     if (!bike) return;
@@ -90,41 +92,59 @@ export default function BikeDetailPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Image */}
-            <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
-              {bike.imageUrl ? (
-                <img
-                  src={bike.imageUrl}
-                  alt={bike.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Bike className="w-24 h-24 text-muted-foreground/30" />
+            {/* Images */}
+            <div>
+              <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
+                {bike.images?.[activeImage] ? (
+                  <img
+                    src={bike.images[activeImage]}
+                    alt={bike.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Bike className="w-24 h-24 text-muted-foreground/30" />
+                  </div>
+                )}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <Show when="signed-in">
+                    <button
+                      onClick={handleFavoriteToggle}
+                      className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all",
+                        bike.isFavorited ? "bg-red-500 text-white" : "bg-white text-gray-600 hover:bg-red-50"
+                      )}
+                    >
+                      <Heart className={cn("w-5 h-5", bike.isFavorited && "fill-current")} />
+                    </button>
+                  </Show>
+                  <button
+                    onClick={handleShare}
+                    className="w-10 h-10 rounded-full bg-white text-gray-600 flex items-center justify-center shadow-md hover:bg-gray-50"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              {bike.images && bike.images.length > 1 && (
+                <div className="flex gap-2 mt-3 overflow-x-auto">
+                  {bike.images.map((img: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImage(i)}
+                      className={cn(
+                        "w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+                        activeImage === i ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      <img src={img} alt={`${bike.title} ${i + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
                 </div>
               )}
-              <div className="absolute top-4 left-4 flex gap-2">
-                <Show when="signed-in">
-                  <button
-                    onClick={handleFavoriteToggle}
-                    className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all",
-                      bike.isFavorited ? "bg-red-500 text-white" : "bg-white text-gray-600 hover:bg-red-50"
-                    )}
-                  >
-                    <Heart className={cn("w-5 h-5", bike.isFavorited && "fill-current")} />
-                  </button>
-                </Show>
-                <button
-                  onClick={handleShare}
-                  className="w-10 h-10 rounded-full bg-white text-gray-600 flex items-center justify-center shadow-md hover:bg-gray-50"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
             </div>
 
             {/* Details */}
@@ -149,11 +169,17 @@ export default function BikeDetailPage() {
                 {bike.brand && (
                   <span className="text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">{bike.brand}</span>
                 )}
+                {bike.category === "motorcycle" && bike.mileage != null && (
+                  <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">
+                    <Gauge className="w-4 h-4 text-primary" />
+                    {Number(bike.mileage).toLocaleString()} كم
+                  </span>
+                )}
               </div>
 
               {bike.description && (
                 <div className="mb-5">
-                  <h3 className="font-semibold text-foreground mb-2">الوصف</h3>
+                  <h3 className="font-semibold text-foreground mb-2">مواصفات الدراجة</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{bike.description}</p>
                 </div>
               )}

@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Heart, Tag, Zap, Mountain, Wind, Bike as BikeIcon, Users, HelpCircle } from "lucide-react";
+import { Heart, Tag, Zap, Mountain, Wind, Bike as BikeIcon, Users, HelpCircle, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAddFavorite, useRemoveFavorite } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,7 +15,8 @@ interface Bike {
   condition: string;
   brand?: string;
   phone: string;
-  imageUrl?: string;
+  images?: string[];
+  mileage?: number;
   status: string;
   isFavorited?: boolean;
   userName?: string;
@@ -23,14 +24,14 @@ interface Bike {
 }
 
 const categoryIcons: Record<string, any> = {
-  mountain: Mountain, road: Wind, electric: Zap, bmx: Tag, kids: Users, hybrid: BikeIcon, other: HelpCircle,
+  mountain: Mountain, road: Wind, electric: Zap, motorcycle: Gauge, bmx: Tag, kids: Users, hybrid: BikeIcon, other: HelpCircle,
 };
 const categoryLabels: Record<string, string> = {
-  mountain: "جبلية", road: "طريق", electric: "كهربائية", bmx: "بي إم إكس",
+  mountain: "جبلية", road: "طريق", electric: "كهربائية", motorcycle: "نارية", bmx: "بي إم إكس",
   kids: "أطفال", hybrid: "هجين", other: "أخرى",
 };
 const conditionLabels: Record<string, string> = {
-  new: "جديدة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
+  new: "جديدة", used: "مستخدمة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
 };
 
 export default function BikeCard({ bike, showStatus = false }: { bike: Bike; showStatus?: boolean }) {
@@ -111,9 +112,9 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
       {/* Image side (left in RTL = left visually) */}
       <div className="relative w-28 flex-shrink-0">
-        {bike.imageUrl ? (
+        {bike.images?.[0] ? (
           <img
-            src={bike.imageUrl}
+            src={bike.images[0]}
             alt={bike.title}
             className="w-full h-full object-cover"
             onError={(e) => {

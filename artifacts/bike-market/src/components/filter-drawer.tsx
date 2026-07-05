@@ -35,9 +35,12 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [documents, setDocuments] = useState<Documents>("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minMileage, setMinMileage] = useState("");
+  const [maxMileage, setMaxMileage] = useState("");
 
   const showCategory = mainType === "bicycle";
   const showDocuments = mainType === "motorcycle";
+  const showMileage = mainType === "motorcycle";
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -58,6 +61,11 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
 
+    if (showMileage) {
+      if (minMileage) params.set("minMileage", minMileage);
+      if (maxMileage) params.set("maxMileage", maxMileage);
+    }
+
     onClose();
     navigate(`/listings${params.toString() ? `?${params.toString()}` : ""}`);
   };
@@ -69,6 +77,8 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     setDocuments("all");
     setMinPrice("");
     setMaxPrice("");
+    setMinMileage("");
+    setMaxMileage("");
   };
 
   if (!open) return null;
@@ -195,6 +205,35 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                     {d.label}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* الممشى — فقط للدراجات النارية */}
+          {showMileage && (
+            <div>
+              <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">الممشى (كم)</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">أقل ممشى</label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={minMileage}
+                    onChange={(e) => setMinMileage(e.target.value)}
+                    className="h-10 border-gray-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">أعلى ممشى</label>
+                  <Input
+                    type="number"
+                    placeholder="غير محدد"
+                    value={maxMileage}
+                    onChange={(e) => setMaxMileage(e.target.value)}
+                    className="h-10 border-gray-200 text-sm"
+                  />
+                </div>
               </div>
             </div>
           )}

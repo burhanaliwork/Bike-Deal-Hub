@@ -160,8 +160,8 @@ function AdminListings() {
       {bikes?.map((bike: any) => (
         <div key={bike.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
           <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-            {bike.imageUrl ? (
-              <img src={bike.imageUrl} alt={bike.title} className="w-full h-full object-cover"
+            {bike.images?.[0] ? (
+              <img src={bike.images[0]} alt={bike.title} className="w-full h-full object-cover"
                 onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600"; }} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

@@ -1,0 +1,1 @@
+- [Object storage web lib in fresh monorepo](object-storage-web-lib-deps.md) — a lib package can be missing its own `node_modules`/react-pin even when the app that imports it typechecks elsewhere; fix at the lib root, not the consumer.

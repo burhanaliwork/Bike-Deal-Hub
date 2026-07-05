@@ -18,13 +18,14 @@ A full-stack Arabic bike marketplace for Iraq, branded as "Ride iQ", inspired by
 - **Routing**: Wouter (base path aware)
 - **Data fetching**: TanStack Query v5 + Orval-generated hooks
 - **ORM**: Drizzle ORM + pg
+- **Object storage**: `@workspace/object-storage-web` (`useUpload` hook) + `@workspace/object-storage` server routes for multi-image bike listing uploads
 
 ## Features
 
 - **Homepage** — top CTA banner ("بيع دراجتك اليوم مجاناً") with bicycle/e-bike/motorcycle illustration, list-view listings feed, no filter shown until user taps "بحث"
 - **Listings** — Search/filter by bike type (bicycle/electric/motorcycle), bicycle category (mountain/road/hybrid/kids), condition, price range (IQD) with iqcars-style list cards
 - **Bike Detail** — Full info, Call Seller button, WhatsApp button, favorites
-- **Sell** — Create listing form with image URL, phone number (Iraqi 07XXXXXXXXX format) — no login required
+- **Sell** — Bike type selector first (كهربائية/نارية/هوائية), bicycle sub-category (جبلي/رود/هجين/الأطفال), brand ("شركة الدراجة"), condition (جديد/مستخدم), motorcycle-only mileage ("الممشى"), description ("مواصفات الدراجة"), multi-image upload (min 2 images via object storage), phone number ("رقم التليفون", Iraqi 07XXXXXXXXX format) — no login required
 - **My Listings** — View/delete own listings, mark as sold
 - **Favorites** — Save bikes for later
 - **Admin Dashboard** — Stats overview, approve/reject/mark-sold listings, user list
@@ -32,7 +33,7 @@ A full-stack Arabic bike marketplace for Iraq, branded as "Ride iQ", inspired by
 
 ## Database Schema (`lib/db/src/schema/bikes.ts`)
 
-- `bikes` — bike listings (id, title, description, price, category, condition, brand, phone, imageUrl, status, userId, userName, userEmail)
+- `bikes` — bike listings (id, title, description, price, category, condition, brand, phone, images text[], mileage integer — motorcycle-only, status, userId, userName, userEmail)
 - `favorites` — user→bike favorites
 - `users` — synced from Clerk auth tokens
 
