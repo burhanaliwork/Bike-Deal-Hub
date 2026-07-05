@@ -135,7 +135,7 @@ export default function BikeDetailPage() {
               </div>
 
               <div className="text-3xl font-black text-primary mb-4">
-                $ {Number(bike.price).toLocaleString()}
+                {Number(bike.price).toLocaleString()} <span className="text-lg font-bold">د.ع</span>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">

@@ -1,6 +1,6 @@
 # Ride iQ — سوق الدراجات
 
-A full-stack Arabic bike marketplace for Iraq, branded as "Ride iQ", inspired by iqcars.net layout with a distinct navy-blue identity. Users buy and sell bikes with direct phone/WhatsApp contact. Prices are in USD ($), no login/sign-up required to post or browse.
+A full-stack Arabic bike marketplace for Iraq, branded as "Ride iQ", inspired by iqcars.net layout with a distinct navy-blue identity. Users buy and sell bikes with direct phone/WhatsApp contact. Prices are in Iraqi Dinar (د.ع / IQD), no login/sign-up required to post or browse.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ A full-stack Arabic bike marketplace for Iraq, branded as "Ride iQ", inspired by
 ## Features
 
 - **Homepage** — top CTA banner ("بيع دراجتك اليوم مجاناً") with bicycle/e-bike/motorcycle illustration, list-view listings feed, no filter shown until user taps "بحث"
-- **Listings** — Search/filter by bike type (bicycle/electric/motorcycle), condition, price range ($) with iqcars-style list cards
+- **Listings** — Search/filter by bike type (bicycle/electric/motorcycle), bicycle category (mountain/road/hybrid/kids), condition, price range (IQD) with iqcars-style list cards
 - **Bike Detail** — Full info, Call Seller button, WhatsApp button, favorites
 - **Sell** — Create listing form with image URL, phone number (Iraqi 07XXXXXXXXX format) — no login required
 - **My Listings** — View/delete own listings, mark as sold
@@ -78,5 +78,5 @@ Both workflows run automatically:
 - **Brand**: Ride iQ — wheel SVG logo, `ride` text + `iQ` blue badge
 - **Theme**: Deep navy (#0D1B35) + vibrant blue (hsl 213 88% 50%) on light gray background
 - **Language**: Arabic (RTL), English brand name "Ride iQ"
-- **Market**: Iraq — currency is USD ($), phone format 07XXXXXXXXX
+- **Market**: Iraq — currency is Iraqi Dinar (د.ع / IQD), phone format 07XXXXXXXXX
 - **Layout**: iqcars.net-inspired — sticky white navbar with "بحث" + "بيع دراجتك" buttons, list-view cards (small image on one side, details + price on the other)

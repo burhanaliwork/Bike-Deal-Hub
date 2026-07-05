@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Bike, Skeleton as SkeletonIcon } from "lucide-react";
+import { Bike } from "lucide-react";
 import { useListBikes } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import BikeCard from "@/components/bike-card";

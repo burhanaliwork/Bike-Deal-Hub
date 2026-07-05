@@ -104,7 +104,7 @@ export default function MyListingsPage() {
                       <h3 className="font-semibold text-foreground truncate">{bike.title}</h3>
                       <StatusBadge status={bike.status} />
                     </div>
-                    <div className="text-xl font-bold text-primary mb-1">$ {Number(bike.price).toLocaleString()}</div>
+                    <div className="text-xl font-bold text-primary mb-1">{Number(bike.price).toLocaleString()} <span className="text-sm font-bold">د.ع</span></div>
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Phone className="w-3.5 h-3.5" />
                       <span dir="ltr">{bike.phone}</span>

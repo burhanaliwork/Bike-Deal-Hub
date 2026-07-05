@@ -91,7 +91,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
         {/* Price */}
         <div className="text-lg font-black text-primary leading-none mt-auto">
-          <span className="text-sm font-bold">$</span>{bike.price.toLocaleString()}
+          {bike.price.toLocaleString()} <span className="text-sm font-bold">د.ع</span>
         </div>
 
         {/* Phone row */}

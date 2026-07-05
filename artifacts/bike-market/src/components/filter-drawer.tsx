@@ -20,24 +20,31 @@ const mainTypes: { value: BikeMainType; label: string }[] = [
   { value: "motorcycle", label: "دراجات نارية" },
 ];
 
+const bicycleCategories: { value: string; label: string }[] = [
+  { value: "mountain", label: "جبلي" },
+  { value: "road", label: "رود" },
+  { value: "hybrid", label: "هجين" },
+  { value: "kids", label: "الأطفال" },
+];
+
 export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [, navigate] = useLocation();
   const [mainType, setMainType] = useState<BikeMainType | "">("");
+  const [category, setCategory] = useState("");
   const [condition, setCondition] = useState<Condition>("all");
   const [documents, setDocuments] = useState<Documents>("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [minOdo, setMinOdo] = useState("");
-  const [maxOdo, setMaxOdo] = useState("");
 
-  const showOdometer = mainType === "electric" || mainType === "motorcycle";
+  const showCategory = mainType === "bicycle";
   const showDocuments = mainType === "motorcycle";
 
   const handleSearch = () => {
     const params = new URLSearchParams();
 
-    if (mainType === "bicycle") params.set("mainType", "bicycle");
-    else if (mainType === "electric") params.set("category", "electric");
+    if (mainType === "bicycle") {
+      if (category) params.set("category", category);
+    } else if (mainType === "electric") params.set("category", "electric");
     else if (mainType === "motorcycle") params.set("category", "motorcycle");
 
     if (condition === "new") params.set("condition", "new");
@@ -51,23 +58,17 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
 
-    if (showOdometer) {
-      if (minOdo) params.set("minOdo", minOdo);
-      if (maxOdo) params.set("maxOdo", maxOdo);
-    }
-
     onClose();
     navigate(`/listings${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   const handleClear = () => {
     setMainType("");
+    setCategory("");
     setCondition("all");
     setDocuments("all");
     setMinPrice("");
     setMaxPrice("");
-    setMinOdo("");
-    setMaxOdo("");
   };
 
   if (!open) return null;
@@ -106,7 +107,10 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
               {mainTypes.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => setMainType(t.value)}
+                  onClick={() => {
+                    setMainType(t.value);
+                    if (t.value !== "bicycle") setCategory("");
+                  }}
                   className={cn(
                     "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all text-right",
                     mainType === t.value
@@ -119,6 +123,29 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
               ))}
             </div>
           </div>
+
+          {/* الفئة — فقط للدراجات الهوائية */}
+          {showCategory && (
+            <div>
+              <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">الفئة</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {bicycleCategories.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => setCategory(c.value)}
+                    className={cn(
+                      "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all",
+                      category === c.value
+                        ? "border-primary bg-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* الحالة */}
           <div>
@@ -174,7 +201,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
 
           {/* السعر */}
           <div>
-            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نطاق السعر ($)</h3>
+            <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">نطاق السعر (الدينار العراقي)</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">أقل سعر</label>
@@ -198,37 +225,6 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
               </div>
             </div>
           </div>
-
-          {/* عداد المسافة — فقط للكهربائية والنارية */}
-          {showOdometer && (
-            <div>
-              <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">
-                عداد المسافة (كم)
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-gray-400 block mb-1">أقل عداد</label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={minOdo}
-                    onChange={(e) => setMinOdo(e.target.value)}
-                    className="h-10 border-gray-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 block mb-1">أقصى عداد</label>
-                  <Input
-                    type="number"
-                    placeholder="غير محدد"
-                    value={maxOdo}
-                    onChange={(e) => setMaxOdo(e.target.value)}
-                    className="h-10 border-gray-200 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer actions */}

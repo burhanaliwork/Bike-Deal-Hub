@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Bike, Phone, Tag, DollarSign, Image, FileText } from "lucide-react";
+import { Bike, Phone, Tag, Coins, Image, FileText } from "lucide-react";
 
 export default function SellPage() {
   const [, navigate] = useLocation();
@@ -138,9 +138,9 @@ export default function SellPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="price">السعر ($) <span className="text-red-500">*</span></Label>
+                <Label htmlFor="price">السعر (د.ع) <span className="text-red-500">*</span></Label>
                 <div className="relative">
-                  <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Coins className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="price"
                     type="number"
