@@ -95,18 +95,11 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
           {bike.price.toLocaleString()} <span className="text-sm font-bold">د.ع</span>
         </div>
 
-        {/* Phone row */}
-        <div
-          className="flex items-center justify-between mt-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <a
-            href={`tel:${bike.phone}`}
-            className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white px-2.5 py-1 rounded-md font-semibold transition-colors"
-          >
-            اتصل
-          </a>
-          <span dir="ltr" className="text-xs text-gray-400 font-medium">{bike.phone}</span>
+        {/* Details link */}
+        <div className="mt-0.5">
+          <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-md font-semibold inline-block">
+            عرض التفاصيل
+          </span>
         </div>
       </div>
 
