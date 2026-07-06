@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { X, SlidersHorizontal, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,15 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
   const [maxPrice, setMaxPrice] = useState("");
   const [minMileage, setMinMileage] = useState("");
   const [maxMileage, setMaxMileage] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
   const showCategory = mainType === "bicycle";
   const showDocuments = mainType === "motorcycle";
