@@ -175,7 +175,7 @@ function AdminListings() {
               <StatusBadge status={bike.status} />
             </div>
             <div className="text-sm text-muted-foreground">
-              {Number(bike.price).toLocaleString()} د.ع · {bike.category} · {bike.userName || "مستخدم غير معروف"}
+              {Number(bike.price).toLocaleString()} د.ع · {bike.category} · علي حيدر
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
-import { ArrowRight, Phone, Heart, Share2, Bike, Calendar, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge } from "lucide-react";
+import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight } from "lucide-react";
 import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -33,6 +33,45 @@ export default function BikeDetailPage() {
 
   const CategoryIcon = bike ? (categoryIcons[bike.category] || Bike) : Bike;
   const [activeImage, setActiveImage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
+
+  const imageCount = bike?.images?.length ?? 0;
+
+  const goToPrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (imageCount < 2) return;
+    setActiveImage((prev) => (prev - 1 + imageCount) % imageCount);
+  };
+
+  const goToNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (imageCount < 2) return;
+    setActiveImage((prev) => (prev + 1) % imageCount);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null) return;
+    const delta = touchDeltaX.current;
+    const threshold = 40;
+    if (delta > threshold) {
+      goToPrev();
+    } else if (delta < -threshold) {
+      goToNext();
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
 
   const handleFavoriteToggle = () => {
     if (!bike) return;
@@ -94,21 +133,70 @@ export default function BikeDetailPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Images */}
             <div>
-              <div className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3]">
-                {bike.images?.[activeImage] ? (
-                  <img
-                    src={bike.images[activeImage]}
-                    alt={bike.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Bike className="w-24 h-24 text-muted-foreground/30" />
-                  </div>
+              <div
+                className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3] touch-pan-y select-none"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <div
+                  dir="ltr"
+                  className="flex h-full transition-transform duration-300 ease-out"
+                  style={{ transform: `translateX(-${(bike.images?.length ?? 1) > 1 ? activeImage * 100 : 0}%)` }}
+                >
+                  {(bike.images && bike.images.length > 0 ? bike.images : [null]).map((img: string | null, i: number) => (
+                    <div key={i} className="w-full h-full flex-shrink-0">
+                      {img ? (
+                        <img
+                          src={img}
+                          alt={`${bike.title} ${i + 1}`}
+                          className="w-full h-full object-cover"
+                          draggable={false}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Bike className="w-24 h-24 text-muted-foreground/30" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {bike.images && bike.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={goToPrev}
+                      aria-label="الصورة السابقة"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-gray-700 flex items-center justify-center shadow-md hover:bg-white transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={goToNext}
+                      aria-label="الصورة التالية"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 text-gray-700 flex items-center justify-center shadow-md hover:bg-white transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {bike.images.map((_: string, i: number) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveImage(i)}
+                          aria-label={`صورة ${i + 1}`}
+                          className={cn(
+                            "w-2 h-2 rounded-full transition-all",
+                            activeImage === i ? "bg-white w-4" : "bg-white/60"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
+
                 <div className="absolute top-4 left-4 flex gap-2">
                   <Show when="signed-in">
                     <button
@@ -183,25 +271,6 @@ export default function BikeDetailPage() {
                   <p className="text-muted-foreground text-sm leading-relaxed">{bike.description}</p>
                 </div>
               )}
-
-              <div className="border border-border rounded-xl p-4 mb-5 space-y-3">
-                <h3 className="font-semibold text-foreground">معلومات البائع</h3>
-                {bike.userName && (
-                  <div className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">{bike.userName}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-primary" />
-                  <span className="font-bold text-foreground text-lg" dir="ltr">{bike.phone}</span>
-                </div>
-                {bike.createdAt && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-3.5 h-3.5" />
-                    تاريخ النشر: {new Date(bike.createdAt).toLocaleDateString("ar-IQ", { year: "numeric", month: "long", day: "numeric" })}
-                  </div>
-                )}
-              </div>
 
               <div className="flex gap-3">
                 <a

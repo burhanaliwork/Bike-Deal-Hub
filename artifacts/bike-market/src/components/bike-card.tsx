@@ -153,14 +153,15 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 }
 
 export function StatusBadge({ status }: { status: string }) {
+  if (status === "active") return null;
+
   const variants: Record<string, string> = {
-    active: "bg-green-100 text-green-700",
     pending: "bg-amber-100 text-amber-700",
     sold: "bg-gray-100 text-gray-500",
     rejected: "bg-red-100 text-red-700",
   };
   const labels: Record<string, string> = {
-    active: "نشط", pending: "قيد المراجعة", sold: "مباع", rejected: "مرفوض",
+    pending: "قيد المراجعة", sold: "مباع", rejected: "مرفوض",
   };
   return (
     <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded-full", variants[status] || variants.pending)}>
