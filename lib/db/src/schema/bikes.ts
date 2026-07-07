@@ -2,6 +2,25 @@ import { pgTable, text, serial, integer, numeric, timestamp, boolean } from "dri
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export const showroomsTable = pgTable("showrooms", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  googleMapsUrl: text("google_maps_url"),
+  phone: text("phone"),
+  verified: boolean("verified").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const accountsTable = pgTable("accounts", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull(), // 'admin' | 'showroom'
+  showroomId: integer("showroom_id").references(() => showroomsTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const bikesTable = pgTable("bikes", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -18,6 +37,7 @@ export const bikesTable = pgTable("bikes", {
   hasDelivery: boolean("has_delivery").notNull().default(false),
   hasDocuments: boolean("has_documents").notNull().default(false),
   status: text("status").notNull().default("active"),
+  showroomId: integer("showroom_id").references(() => showroomsTable.id, { onDelete: "set null" }),
   userId: text("user_id").notNull(),
   userName: text("user_name"),
   userEmail: text("user_email"),
@@ -44,3 +64,5 @@ export type InsertBike = z.infer<typeof insertBikeSchema>;
 export type Bike = typeof bikesTable.$inferSelect;
 export type Favorite = typeof favoritesTable.$inferSelect;
 export type User = typeof usersTable.$inferSelect;
+export type Showroom = typeof showroomsTable.$inferSelect;
+export type Account = typeof accountsTable.$inferSelect;

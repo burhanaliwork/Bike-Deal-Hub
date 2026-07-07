@@ -17,15 +17,22 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AccountInfo,
   AdminStats,
+  AuthSession,
   Bike,
   CreateBikeBody,
+  CreateShowroomBody,
   ErrorEnvelope,
   HealthStatus,
   ListBikesParams,
+  LoginBody,
   MarketplaceStats,
+  Showroom,
   UpdateBikeBody,
   UpdateBikeStatusBody,
+  UpdateShowroomBikeBody,
+  UpdateShowroomBody,
   UploadUrlRequest,
   UploadUrlResponse,
   User,
@@ -39,6 +46,906 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * @summary Login with username and password
+ */
+export const getLoginUrl = () => {
+  return `/api/auth/login`;
+};
+
+export const login = async (
+  loginBody: LoginBody,
+  options?: RequestInit,
+): Promise<AuthSession> => {
+  return customFetch<AuthSession>(getLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(loginBody),
+  });
+};
+
+export const getLoginMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  const mutationKey = ["login"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof login>>,
+    { data: BodyType<LoginBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return login(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof login>>
+>;
+export type LoginMutationBody = BodyType<LoginBody>;
+export type LoginMutationError = ErrorType<void>;
+
+/**
+ * @summary Login with username and password
+ */
+export const useLogin = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  return useMutation(getLoginMutationOptions(options));
+};
+
+/**
+ * @summary Get current account info
+ */
+export const getGetMeUrl = () => {
+  return `/api/auth/me`;
+};
+
+export const getMe = async (options?: RequestInit): Promise<AccountInfo> => {
+  return customFetch<AccountInfo>(getGetMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMeQueryKey = () => {
+  return [`/api/auth/me`] as const;
+};
+
+export const getGetMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMe>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMe>>> = ({
+    signal,
+  }) => getMe({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMe>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMeQueryResult = NonNullable<Awaited<ReturnType<typeof getMe>>>;
+export type GetMeQueryError = ErrorType<void>;
+
+/**
+ * @summary Get current account info
+ */
+
+export function useGetMe<
+  TData = Awaited<ReturnType<typeof getMe>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get public showroom profile
+ */
+export const getGetShowroomUrl = (id: number) => {
+  return `/api/showrooms/${id}`;
+};
+
+export const getShowroom = async (
+  id: number,
+  options?: RequestInit,
+): Promise<Showroom> => {
+  return customFetch<Showroom>(getGetShowroomUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetShowroomQueryKey = (id: number) => {
+  return [`/api/showrooms/${id}`] as const;
+};
+
+export const getGetShowroomQueryOptions = <
+  TData = Awaited<ReturnType<typeof getShowroom>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getShowroom>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetShowroomQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getShowroom>>> = ({
+    signal,
+  }) => getShowroom(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getShowroom>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetShowroomQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getShowroom>>
+>;
+export type GetShowroomQueryError = ErrorType<void>;
+
+/**
+ * @summary Get public showroom profile
+ */
+
+export function useGetShowroom<
+  TData = Awaited<ReturnType<typeof getShowroom>>,
+  TError = ErrorType<void>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getShowroom>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetShowroomQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Admin - list all showrooms
+ */
+export const getAdminListShowroomsUrl = () => {
+  return `/api/admin/showrooms`;
+};
+
+export const adminListShowrooms = async (
+  options?: RequestInit,
+): Promise<Showroom[]> => {
+  return customFetch<Showroom[]>(getAdminListShowroomsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getAdminListShowroomsQueryKey = () => {
+  return [`/api/admin/showrooms`] as const;
+};
+
+export const getAdminListShowroomsQueryOptions = <
+  TData = Awaited<ReturnType<typeof adminListShowrooms>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof adminListShowrooms>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAdminListShowroomsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof adminListShowrooms>>
+  > = ({ signal }) => adminListShowrooms({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof adminListShowrooms>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type AdminListShowroomsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof adminListShowrooms>>
+>;
+export type AdminListShowroomsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Admin - list all showrooms
+ */
+
+export function useAdminListShowrooms<
+  TData = Awaited<ReturnType<typeof adminListShowrooms>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof adminListShowrooms>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getAdminListShowroomsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Admin - create showroom with its account
+ */
+export const getAdminCreateShowroomUrl = () => {
+  return `/api/admin/showrooms`;
+};
+
+export const adminCreateShowroom = async (
+  createShowroomBody: CreateShowroomBody,
+  options?: RequestInit,
+): Promise<Showroom> => {
+  return customFetch<Showroom>(getAdminCreateShowroomUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createShowroomBody),
+  });
+};
+
+export const getAdminCreateShowroomMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminCreateShowroom>>,
+    TError,
+    { data: BodyType<CreateShowroomBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminCreateShowroom>>,
+  TError,
+  { data: BodyType<CreateShowroomBody> },
+  TContext
+> => {
+  const mutationKey = ["adminCreateShowroom"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminCreateShowroom>>,
+    { data: BodyType<CreateShowroomBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return adminCreateShowroom(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AdminCreateShowroomMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminCreateShowroom>>
+>;
+export type AdminCreateShowroomMutationBody = BodyType<CreateShowroomBody>;
+export type AdminCreateShowroomMutationError = ErrorType<void>;
+
+/**
+ * @summary Admin - create showroom with its account
+ */
+export const useAdminCreateShowroom = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminCreateShowroom>>,
+    TError,
+    { data: BodyType<CreateShowroomBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof adminCreateShowroom>>,
+  TError,
+  { data: BodyType<CreateShowroomBody> },
+  TContext
+> => {
+  return useMutation(getAdminCreateShowroomMutationOptions(options));
+};
+
+/**
+ * @summary Admin - update showroom (optionally reset password)
+ */
+export const getAdminUpdateShowroomUrl = (id: number) => {
+  return `/api/admin/showrooms/${id}`;
+};
+
+export const adminUpdateShowroom = async (
+  id: number,
+  updateShowroomBody: UpdateShowroomBody,
+  options?: RequestInit,
+): Promise<Showroom> => {
+  return customFetch<Showroom>(getAdminUpdateShowroomUrl(id), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateShowroomBody),
+  });
+};
+
+export const getAdminUpdateShowroomMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminUpdateShowroom>>,
+    TError,
+    { id: number; data: BodyType<UpdateShowroomBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminUpdateShowroom>>,
+  TError,
+  { id: number; data: BodyType<UpdateShowroomBody> },
+  TContext
+> => {
+  const mutationKey = ["adminUpdateShowroom"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminUpdateShowroom>>,
+    { id: number; data: BodyType<UpdateShowroomBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return adminUpdateShowroom(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AdminUpdateShowroomMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminUpdateShowroom>>
+>;
+export type AdminUpdateShowroomMutationBody = BodyType<UpdateShowroomBody>;
+export type AdminUpdateShowroomMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Admin - update showroom (optionally reset password)
+ */
+export const useAdminUpdateShowroom = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminUpdateShowroom>>,
+    TError,
+    { id: number; data: BodyType<UpdateShowroomBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof adminUpdateShowroom>>,
+  TError,
+  { id: number; data: BodyType<UpdateShowroomBody> },
+  TContext
+> => {
+  return useMutation(getAdminUpdateShowroomMutationOptions(options));
+};
+
+/**
+ * @summary Admin - delete showroom, its account and its bikes
+ */
+export const getAdminDeleteShowroomUrl = (id: number) => {
+  return `/api/admin/showrooms/${id}`;
+};
+
+export const adminDeleteShowroom = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getAdminDeleteShowroomUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getAdminDeleteShowroomMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminDeleteShowroom>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminDeleteShowroom>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["adminDeleteShowroom"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminDeleteShowroom>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return adminDeleteShowroom(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AdminDeleteShowroomMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminDeleteShowroom>>
+>;
+
+export type AdminDeleteShowroomMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Admin - delete showroom, its account and its bikes
+ */
+export const useAdminDeleteShowroom = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminDeleteShowroom>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof adminDeleteShowroom>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getAdminDeleteShowroomMutationOptions(options));
+};
+
+/**
+ * @summary Showroom - list own bikes
+ */
+export const getShowroomListBikesUrl = () => {
+  return `/api/showroom/bikes`;
+};
+
+export const showroomListBikes = async (
+  options?: RequestInit,
+): Promise<Bike[]> => {
+  return customFetch<Bike[]>(getShowroomListBikesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getShowroomListBikesQueryKey = () => {
+  return [`/api/showroom/bikes`] as const;
+};
+
+export const getShowroomListBikesQueryOptions = <
+  TData = Awaited<ReturnType<typeof showroomListBikes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof showroomListBikes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getShowroomListBikesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof showroomListBikes>>
+  > = ({ signal }) => showroomListBikes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof showroomListBikes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ShowroomListBikesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof showroomListBikes>>
+>;
+export type ShowroomListBikesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Showroom - list own bikes
+ */
+
+export function useShowroomListBikes<
+  TData = Awaited<ReturnType<typeof showroomListBikes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof showroomListBikes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getShowroomListBikesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Showroom - create a bike listing
+ */
+export const getShowroomCreateBikeUrl = () => {
+  return `/api/showroom/bikes`;
+};
+
+export const showroomCreateBike = async (
+  createBikeBody: CreateBikeBody,
+  options?: RequestInit,
+): Promise<Bike> => {
+  return customFetch<Bike>(getShowroomCreateBikeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createBikeBody),
+  });
+};
+
+export const getShowroomCreateBikeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomCreateBike>>,
+    TError,
+    { data: BodyType<CreateBikeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof showroomCreateBike>>,
+  TError,
+  { data: BodyType<CreateBikeBody> },
+  TContext
+> => {
+  const mutationKey = ["showroomCreateBike"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof showroomCreateBike>>,
+    { data: BodyType<CreateBikeBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return showroomCreateBike(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ShowroomCreateBikeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof showroomCreateBike>>
+>;
+export type ShowroomCreateBikeMutationBody = BodyType<CreateBikeBody>;
+export type ShowroomCreateBikeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Showroom - create a bike listing
+ */
+export const useShowroomCreateBike = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomCreateBike>>,
+    TError,
+    { data: BodyType<CreateBikeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof showroomCreateBike>>,
+  TError,
+  { data: BodyType<CreateBikeBody> },
+  TContext
+> => {
+  return useMutation(getShowroomCreateBikeMutationOptions(options));
+};
+
+/**
+ * @summary Showroom - update own bike listing
+ */
+export const getShowroomUpdateBikeUrl = (id: number) => {
+  return `/api/showroom/bikes/${id}`;
+};
+
+export const showroomUpdateBike = async (
+  id: number,
+  updateShowroomBikeBody: UpdateShowroomBikeBody,
+  options?: RequestInit,
+): Promise<Bike> => {
+  return customFetch<Bike>(getShowroomUpdateBikeUrl(id), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateShowroomBikeBody),
+  });
+};
+
+export const getShowroomUpdateBikeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomUpdateBike>>,
+    TError,
+    { id: number; data: BodyType<UpdateShowroomBikeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof showroomUpdateBike>>,
+  TError,
+  { id: number; data: BodyType<UpdateShowroomBikeBody> },
+  TContext
+> => {
+  const mutationKey = ["showroomUpdateBike"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof showroomUpdateBike>>,
+    { id: number; data: BodyType<UpdateShowroomBikeBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return showroomUpdateBike(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ShowroomUpdateBikeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof showroomUpdateBike>>
+>;
+export type ShowroomUpdateBikeMutationBody = BodyType<UpdateShowroomBikeBody>;
+export type ShowroomUpdateBikeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Showroom - update own bike listing
+ */
+export const useShowroomUpdateBike = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomUpdateBike>>,
+    TError,
+    { id: number; data: BodyType<UpdateShowroomBikeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof showroomUpdateBike>>,
+  TError,
+  { id: number; data: BodyType<UpdateShowroomBikeBody> },
+  TContext
+> => {
+  return useMutation(getShowroomUpdateBikeMutationOptions(options));
+};
+
+/**
+ * @summary Showroom - delete own bike listing
+ */
+export const getShowroomDeleteBikeUrl = (id: number) => {
+  return `/api/showroom/bikes/${id}`;
+};
+
+export const showroomDeleteBike = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getShowroomDeleteBikeUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getShowroomDeleteBikeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomDeleteBike>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof showroomDeleteBike>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["showroomDeleteBike"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof showroomDeleteBike>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return showroomDeleteBike(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ShowroomDeleteBikeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof showroomDeleteBike>>
+>;
+
+export type ShowroomDeleteBikeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Showroom - delete own bike listing
+ */
+export const useShowroomDeleteBike = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof showroomDeleteBike>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof showroomDeleteBike>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getShowroomDeleteBikeMutationOptions(options));
+};
 
 /**
  * @summary Health check

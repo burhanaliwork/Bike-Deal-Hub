@@ -8,6 +8,287 @@
 import * as zod from "zod";
 
 /**
+ * @summary Login with username and password
+ */
+export const LoginBody = zod.object({
+  username: zod.string(),
+  password: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  token: zod.string(),
+  username: zod.string(),
+  role: zod.string().describe("admin or showroom"),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
+});
+
+/**
+ * @summary Get current account info
+ */
+export const GetMeResponse = zod.object({
+  username: zod.string(),
+  role: zod.string(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
+});
+
+/**
+ * @summary Get public showroom profile
+ */
+export const GetShowroomParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetShowroomResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  imageUrl: zod.string().nullish(),
+  googleMapsUrl: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  verified: zod.boolean(),
+  username: zod.string().nullish(),
+  bikesCount: zod.number().optional(),
+  createdAt: zod.coerce.date().optional(),
+});
+
+/**
+ * @summary Admin - list all showrooms
+ */
+export const AdminListShowroomsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  imageUrl: zod.string().nullish(),
+  googleMapsUrl: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  verified: zod.boolean(),
+  username: zod.string().nullish(),
+  bikesCount: zod.number().optional(),
+  createdAt: zod.coerce.date().optional(),
+});
+export const AdminListShowroomsResponse = zod.array(
+  AdminListShowroomsResponseItem,
+);
+
+/**
+ * @summary Admin - create showroom with its account
+ */
+export const AdminCreateShowroomBody = zod.object({
+  name: zod.string(),
+  imageUrl: zod.string().optional(),
+  googleMapsUrl: zod.string().optional(),
+  phone: zod.string().optional(),
+  username: zod.string(),
+  password: zod.string(),
+});
+
+/**
+ * @summary Admin - update showroom (optionally reset password)
+ */
+export const AdminUpdateShowroomParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AdminUpdateShowroomBody = zod.object({
+  name: zod.string().optional(),
+  imageUrl: zod.string().optional(),
+  googleMapsUrl: zod.string().optional(),
+  phone: zod.string().optional(),
+  verified: zod.boolean().optional(),
+  password: zod
+    .string()
+    .optional()
+    .describe("if provided, resets the showroom account password"),
+});
+
+export const AdminUpdateShowroomResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  imageUrl: zod.string().nullish(),
+  googleMapsUrl: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  verified: zod.boolean(),
+  username: zod.string().nullish(),
+  bikesCount: zod.number().optional(),
+  createdAt: zod.coerce.date().optional(),
+});
+
+/**
+ * @summary Admin - delete showroom, its account and its bikes
+ */
+export const AdminDeleteShowroomParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Showroom - list own bikes
+ */
+export const ShowroomListBikesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().optional(),
+  price: zod.number(),
+  category: zod
+    .string()
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
+  brand: zod.string().optional(),
+  phone: zod.string(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
+  status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
+  userId: zod.string(),
+  userName: zod.string().optional(),
+  userEmail: zod.string().optional(),
+  isFavorited: zod.boolean().optional(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date().optional(),
+});
+export const ShowroomListBikesResponse = zod.array(
+  ShowroomListBikesResponseItem,
+);
+
+/**
+ * @summary Showroom - create a bike listing
+ */
+export const ShowroomCreateBikeBody = zod.object({
+  title: zod.string(),
+  description: zod.string().optional(),
+  price: zod.number(),
+  category: zod.string(),
+  condition: zod.string(),
+  brand: zod.string().optional(),
+  phone: zod.string(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
+  engineCapacity: zod.number().optional(),
+  province: zod.string(),
+  hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod.boolean().optional(),
+});
+
+/**
+ * @summary Showroom - update own bike listing
+ */
+export const ShowroomUpdateBikeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ShowroomUpdateBikeBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  price: zod.number().optional(),
+  category: zod.string().optional(),
+  condition: zod.string().optional(),
+  brand: zod.string().optional(),
+  phone: zod.string().optional(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
+  engineCapacity: zod.number().optional(),
+  province: zod.string().optional(),
+  hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod.boolean().optional(),
+  status: zod.string().optional().describe("active or sold"),
+});
+
+export const ShowroomUpdateBikeResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().optional(),
+  price: zod.number(),
+  category: zod
+    .string()
+    .describe(
+      "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids",
+    ),
+  condition: zod.string().describe("new, used"),
+  brand: zod.string().optional(),
+  phone: zod.string(),
+  images: zod.array(zod.string()).optional(),
+  mileage: zod.number().optional(),
+  engineCapacity: zod
+    .number()
+    .optional()
+    .describe("motorcycle engine capacity in cc"),
+  province: zod
+    .string()
+    .optional()
+    .describe("one of the 18 Iraqi governorates"),
+  hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
+  status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
+  userId: zod.string(),
+  userName: zod.string().optional(),
+  userEmail: zod.string().optional(),
+  isFavorited: zod.boolean().optional(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date().optional(),
+});
+
+/**
+ * @summary Showroom - delete own bike listing
+ */
+export const ShowroomDeleteBikeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -28,6 +309,8 @@ export const ListBikesQueryParams = zod.object({
   maxMileage: zod.coerce.number().optional(),
   province: zod.coerce.string().optional(),
   hasDelivery: zod.coerce.boolean().optional(),
+  hasDocuments: zod.coerce.boolean().optional(),
+  showroomId: zod.coerce.number().optional(),
 });
 
 export const ListBikesResponseItem = zod.object({
@@ -59,6 +342,17 @@ export const ListBikesResponseItem = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -123,6 +417,17 @@ export const GetBikeResponse = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -183,6 +488,17 @@ export const UpdateBikeResponse = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -230,6 +546,17 @@ export const GetMyBikesResponseItem = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -282,6 +609,17 @@ export const GetBikeStatsResponse = zod.object({
         .optional()
         .describe("motorcycle has official registration papers"),
       status: zod.string().describe("active, pending, sold, rejected"),
+      showroomId: zod.number().nullish(),
+      showroom: zod
+        .object({
+          id: zod.number(),
+          name: zod.string(),
+          imageUrl: zod.string().nullish(),
+          googleMapsUrl: zod.string().nullish(),
+          phone: zod.string().nullish(),
+          verified: zod.boolean(),
+        })
+        .nullish(),
       userId: zod.string(),
       userName: zod.string().optional(),
       userEmail: zod.string().optional(),
@@ -324,6 +662,17 @@ export const GetFavoritesResponseItem = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -393,6 +742,17 @@ export const AdminListBikesResponseItem = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),
@@ -442,6 +802,17 @@ export const AdminUpdateBikeStatusResponse = zod.object({
     .optional()
     .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
+  showroomId: zod.number().nullish(),
+  showroom: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      imageUrl: zod.string().nullish(),
+      googleMapsUrl: zod.string().nullish(),
+      phone: zod.string().nullish(),
+      verified: zod.boolean(),
+    })
+    .nullish(),
   userId: zod.string(),
   userName: zod.string().optional(),
   userEmail: zod.string().optional(),

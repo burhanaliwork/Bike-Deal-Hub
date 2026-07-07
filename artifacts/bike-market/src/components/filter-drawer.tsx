@@ -209,8 +209,8 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
               <div className="flex gap-2">
                 {[
                   { value: "all" as Documents, label: "الكل" },
-                  { value: "with" as Documents, label: "مع أوراق" },
-                  { value: "without" as Documents, label: "بدون أوراق" },
+                  { value: "with" as Documents, label: "مع أوراق رسمية" },
+                  { value: "without" as Documents, label: "بدون أوراق رسمية" },
                 ].map((d) => (
                   <button
                     key={d.value}

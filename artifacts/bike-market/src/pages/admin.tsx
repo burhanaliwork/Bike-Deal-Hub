@@ -1,21 +1,25 @@
 import { useState } from "react";
 import { Redirect } from "wouter";
-import { useUser, Show } from "@clerk/react";
 import {
   useGetAdminStats, useAdminListBikes, useAdminListUsers, useAdminUpdateBikeStatus,
-  getAdminListBikesQueryKey, getAdminListUsersQueryKey,
+  useAdminListShowrooms, useAdminCreateShowroom, useAdminDeleteShowroom,
+  getAdminListBikesQueryKey, getAdminListShowroomsQueryKey,
   getGetAdminStatsQueryKey
 } from "@workspace/api-client-react";
+import { useUpload } from "@workspace/object-storage-web";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, Bike, Users, TrendingUp, Clock, CheckCircle, XCircle, Ban, ShieldAlert } from "lucide-react";
+import { useAccountAuth, clearStoredAuth } from "@/lib/accountAuth";
+import { LayoutDashboard, Bike, Users, TrendingUp, Clock, CheckCircle, XCircle, Ban, ShieldAlert, Store, Plus, Trash2, LogOut, Loader2, BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Tab = "overview" | "listings" | "users";
+type Tab = "overview" | "listings" | "showrooms" | "users";
 
 const statusLabels: Record<string, string> = {
   active: "تمت الموافقة",
@@ -25,11 +29,13 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function AdminPage() {
-  const { user, isLoaded } = useUser();
+  const account = useAccountAuth();
+  const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const isAdmin = (user?.publicMetadata as any)?.role === "admin";
 
-  if (isLoaded && !isAdmin) {
+  if (!account) return <Redirect to="/login" />;
+
+  if (account.role !== "admin") {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -45,20 +51,29 @@ export default function AdminPage() {
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
     { id: "listings", label: "جميع الإعلانات", icon: Bike },
+    { id: "showrooms", label: "صالات العرض", icon: Store },
     { id: "users", label: "المستخدمون", icon: Users },
   ];
+
+  const handleLogout = () => {
+    clearStoredAuth();
+    qc.clear();
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Show when="signed-out">
-        <Redirect to="/sign-in" />
-      </Show>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-black text-foreground mb-1">لوحة تحكم الإدارة</h1>
-          <p className="text-muted-foreground">إدارة السوق</p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-foreground mb-1">لوحة تحكم الإدارة</h1>
+            <p className="text-muted-foreground">إدارة السوق</p>
+          </div>
+          <Button variant="outline" size="sm" className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50" onClick={handleLogout}>
+            <LogOut className="w-4 h-4" />
+            خروج
+          </Button>
         </div>
 
         {/* Tabs */}
@@ -82,6 +97,7 @@ export default function AdminPage() {
 
         {activeTab === "overview" && <AdminOverview />}
         {activeTab === "listings" && <AdminListings />}
+        {activeTab === "showrooms" && <AdminShowrooms />}
         {activeTab === "users" && <AdminUsers />}
       </div>
     </div>
@@ -200,6 +216,198 @@ function AdminListings() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AdminShowrooms() {
+  const { data: showrooms, isLoading } = useAdminListShowrooms();
+  const createShowroom = useAdminCreateShowroom();
+  const deleteShowroom = useAdminDeleteShowroom();
+  const { uploadFile, isUploading } = useUpload({ basePath: "/api/storage" });
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    imageUrl: "",
+    googleMapsUrl: "",
+    phone: "",
+    username: "",
+    password: "",
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: getAdminListShowroomsQueryKey() });
+  };
+
+  const handleImageSelected = async (fileList: FileList | null) => {
+    const file = fileList?.[0];
+    if (!file) return;
+    const result = await uploadFile(file);
+    if (result?.objectPath) {
+      setForm((f) => ({ ...f, imageUrl: `/api/storage${result.objectPath}` }));
+    }
+  };
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.username || !form.password) {
+      toast({ title: "الرجاء تعبئة الاسم واسم المستخدم وكلمة المرور", variant: "destructive" });
+      return;
+    }
+    createShowroom.mutate(
+      {
+        data: {
+          name: form.name,
+          username: form.username.trim(),
+          password: form.password,
+          ...(form.imageUrl ? { imageUrl: form.imageUrl } : {}),
+          ...(form.googleMapsUrl ? { googleMapsUrl: form.googleMapsUrl } : {}),
+          ...(form.phone ? { phone: form.phone } : {}),
+        },
+      },
+      {
+        onSuccess: () => {
+          invalidate();
+          setForm({ name: "", imageUrl: "", googleMapsUrl: "", phone: "", username: "", password: "" });
+          setShowForm(false);
+          toast({ title: "تم إنشاء صالة العرض بنجاح" });
+        },
+        onError: (err: any) => {
+          const status = err?.response?.status ?? err?.status;
+          toast({
+            title: status === 409 ? "اسم المستخدم موجود مسبقاً" : "فشل إنشاء صالة العرض",
+            variant: "destructive",
+          });
+        },
+      },
+    );
+  };
+
+  const handleDelete = (id: number, name: string) => {
+    if (!confirm(`سيتم حذف صالة عرض "${name}" وحسابها وجميع منتجاتها. متابعة؟`)) return;
+    deleteShowroom.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          invalidate();
+          toast({ title: "تم حذف صالة العرض" });
+        },
+        onError: () => toast({ title: "فشل الحذف", variant: "destructive" }),
+      },
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">{showrooms?.length ?? 0} صالة عرض</div>
+        <Button size="sm" className="gap-1.5" onClick={() => setShowForm((s) => !s)}>
+          <Plus className="w-4 h-4" />
+          إضافة صالة عرض
+        </Button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleCreate} className="bg-card border border-border rounded-xl p-6 space-y-4">
+          <h3 className="font-bold text-foreground">صالة عرض جديدة</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-name">اسم صالة العرض <span className="text-red-500">*</span></Label>
+              <Input id="sr-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-phone">رقم الهاتف</Label>
+              <Input id="sr-phone" dir="ltr" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="sr-maps">رابط كوكل ماب</Label>
+              <Input id="sr-maps" dir="ltr" placeholder="https://maps.google.com/..." value={form.googleMapsUrl} onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-username">اسم المستخدم <span className="text-red-500">*</span></Label>
+              <Input id="sr-username" dir="ltr" autoComplete="off" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sr-password">كلمة المرور <span className="text-red-500">*</span></Label>
+              <Input id="sr-password" dir="ltr" type="text" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>صورة صالة العرض</Label>
+              <div className="flex items-center gap-3">
+                {form.imageUrl && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-border">
+                    <img src={form.imageUrl} alt="صورة صالة العرض" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <label className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 text-sm text-gray-500 cursor-pointer hover:border-primary hover:text-primary transition-colors",
+                  isUploading && "opacity-60 pointer-events-none"
+                )}>
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  اختر صورة
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageSelected(e.target.files)} />
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={createShowroom.isPending || isUploading}>
+              {createShowroom.isPending ? "جاري الإنشاء..." : "إنشاء صالة العرض"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>إلغاء</Button>
+          </div>
+        </form>
+      )}
+
+      <div className="space-y-3">
+        {showrooms?.map((sr: any) => (
+          <div key={sr.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border">
+              {sr.imageUrl ? (
+                <img src={sr.imageUrl} alt={sr.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Store className="w-6 h-6 text-muted-foreground/30" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="font-semibold text-foreground truncate">صالة عرض {sr.name}</span>
+                {sr.verified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
+              </div>
+              <div className="text-sm text-muted-foreground" dir="ltr">
+                @{sr.username} · {sr.bikesCount ?? 0} منتج
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-red-600 border-red-200 hover:bg-red-50 flex-shrink-0"
+              onClick={() => handleDelete(sr.id, sr.name)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ))}
+        {(!showrooms || showrooms.length === 0) && !showForm && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Store className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+            لا توجد صالات عرض بعد
+          </div>
+        )}
+      </div>
     </div>
   );
 }

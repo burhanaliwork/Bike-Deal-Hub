@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
-import { useParams, useLocation } from "wouter";
-import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight } from "lucide-react";
+import { useParams, useLocation, Link } from "wouter";
+import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight, BadgeCheck, MapPin, Store } from "lucide-react";
 import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -269,7 +269,7 @@ export default function BikeDetailPage() {
                     bike.hasDocuments ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
                   )}>
                     <Tag className="w-4 h-4" />
-                    {bike.hasDocuments ? "مع أوراق رسمية" : "بدون أوراق"}
+                    {bike.hasDocuments ? "مع أوراق رسمية" : "بدون أوراق رسمية"}
                   </span>
                 )}
               </div>
@@ -278,6 +278,51 @@ export default function BikeDetailPage() {
                 <div className="mb-5">
                   <h3 className="font-semibold text-foreground mb-2">مواصفات الدراجة</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">{bike.description}</p>
+                </div>
+              )}
+
+              {bike.showroom && (
+                <div className="mb-5 bg-card border border-border rounded-xl p-4">
+                  <Link
+                    href={`/showrooms/${bike.showroom.id}`}
+                    className="flex items-center gap-3 group"
+                  >
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-border">
+                      {bike.showroom.imageUrl ? (
+                        <img
+                          src={bike.showroom.imageUrl}
+                          alt={bike.showroom.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Store className="w-6 h-6 text-muted-foreground/40" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                        صالة عرض {bike.showroom.name}
+                      </div>
+                      {bike.showroom.verified && (
+                        <div className="flex items-center gap-1 text-xs text-primary font-semibold mt-0.5">
+                          <BadgeCheck className="w-4 h-4" />
+                          صالة عرض معتمدة
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                  {bike.showroom.googleMapsUrl && (
+                    <a
+                      href={bike.showroom.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-primary border border-primary/30 rounded-lg py-2 hover:bg-primary/5 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      الموقع على كوكل ماب
+                    </a>
+                  )}
                 </div>
               )}
 

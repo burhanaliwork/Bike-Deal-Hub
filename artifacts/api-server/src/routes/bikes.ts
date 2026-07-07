@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
-import { bikesTable, favoritesTable, usersTable } from "@workspace/db";
+import { bikesTable, favoritesTable, usersTable, showroomsTable } from "@workspace/db";
 import { eq, and, ilike, gte, lte, desc, sql } from "drizzle-orm";
+import { requireAdminAccount } from "../lib/accountAuth";
 
 const router = Router();
 
@@ -16,19 +17,7 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
-const requireAdmin = async (req: any, res: any, next: any) => {
-  const auth = getAuth(req);
-  const userId = auth?.userId;
-  if (!userId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  const role = (auth?.sessionClaims?.publicMetadata as any)?.role;
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Forbidden" });
-  }
-  req.userId = userId;
-  next();
-};
+const requireAdmin = requireAdminAccount;
 
 async function upsertUser(userId: string, userName?: string, userEmail?: string) {
   try {
@@ -42,11 +31,21 @@ async function upsertUser(userId: string, userName?: string, userEmail?: string)
   } catch {}
 }
 
-function buildBikeResponse(bike: any, isFavorited: boolean = false) {
+function buildBikeResponse(bike: any, isFavorited: boolean = false, showroom: any = null) {
   return {
     ...bike,
     price: parseFloat(bike.price),
     isFavorited,
+    showroom: showroom
+      ? {
+          id: showroom.id,
+          name: showroom.name,
+          imageUrl: showroom.imageUrl,
+          googleMapsUrl: showroom.googleMapsUrl,
+          phone: showroom.phone,
+          verified: showroom.verified,
+        }
+      : null,
   };
 }
 
@@ -55,7 +54,7 @@ router.get("/bikes", async (req: any, res: any) => {
   try {
     const auth = getAuth(req);
     const userId = auth?.userId;
-    const { category, condition, minPrice, maxPrice, minMileage, maxMileage, province, hasDelivery, search, status } = req.query;
+    const { category, condition, minPrice, maxPrice, minMileage, maxMileage, province, hasDelivery, hasDocuments, showroomId, search, status } = req.query;
 
     const conditions: any[] = [];
     if (status) {
@@ -71,11 +70,14 @@ router.get("/bikes", async (req: any, res: any) => {
     if (maxMileage) conditions.push(lte(bikesTable.mileage, parseInt(maxMileage as string)));
     if (province) conditions.push(eq(bikesTable.province, province as string));
     if (hasDelivery !== undefined) conditions.push(eq(bikesTable.hasDelivery, hasDelivery === "true"));
+    if (hasDocuments !== undefined) conditions.push(eq(bikesTable.hasDocuments, hasDocuments === "true"));
+    if (showroomId) conditions.push(eq(bikesTable.showroomId, parseInt(showroomId as string)));
     if (search) conditions.push(ilike(bikesTable.title, `%${search}%`));
 
-    const bikes = await db
-      .select()
+    const rows = await db
+      .select({ bike: bikesTable, showroom: showroomsTable })
       .from(bikesTable)
+      .leftJoin(showroomsTable, eq(bikesTable.showroomId, showroomsTable.id))
       .where(and(...conditions))
       .orderBy(desc(bikesTable.createdAt));
 
@@ -85,7 +87,7 @@ router.get("/bikes", async (req: any, res: any) => {
       favoriteIds = new Set(favs.map((f) => f.bikeId));
     }
 
-    res.json(bikes.map((b) => buildBikeResponse(b, favoriteIds.has(b.id))));
+    res.json(rows.map((r) => buildBikeResponse(r.bike, favoriteIds.has(r.bike.id), r.showroom)));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -195,8 +197,12 @@ router.get("/bikes/:id", async (req: any, res: any) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
-    const [bike] = await db.select().from(bikesTable).where(eq(bikesTable.id, id));
-    if (!bike) return res.status(404).json({ error: "Not found" });
+    const [row] = await db
+      .select({ bike: bikesTable, showroom: showroomsTable })
+      .from(bikesTable)
+      .leftJoin(showroomsTable, eq(bikesTable.showroomId, showroomsTable.id))
+      .where(eq(bikesTable.id, id));
+    if (!row) return res.status(404).json({ error: "Not found" });
 
     let isFavorited = false;
     if (userId) {
@@ -207,7 +213,7 @@ router.get("/bikes/:id", async (req: any, res: any) => {
       isFavorited = !!fav;
     }
 
-    res.json(buildBikeResponse(bike, isFavorited));
+    res.json(buildBikeResponse(row.bike, isFavorited, row.showroom));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });

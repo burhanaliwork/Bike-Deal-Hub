@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useCreateBike, getListBikesQueryKey, getGetMyBikesQueryKey } from "@workspace/api-client-react";
+import {
+  useCreateBike,
+  useShowroomCreateBike,
+  useShowroomUpdateBike,
+  useGetBike,
+  getListBikesQueryKey,
+  getGetMyBikesQueryKey,
+  getShowroomListBikesQueryKey,
+  getGetBikeQueryKey,
+} from "@workspace/api-client-react";
 import { useUpload } from "@workspace/object-storage-web";
+import { useAccountAuth } from "@/lib/accountAuth";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,8 +45,22 @@ export default function SellPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const account = useAccountAuth();
+  const isShowroom = account?.role === "showroom";
   const createBike = useCreateBike();
+  const showroomCreateBike = useShowroomCreateBike();
+  const showroomUpdateBike = useShowroomUpdateBike();
   const { uploadFile, isUploading } = useUpload({ basePath: "/api/storage" });
+
+  const editId = (() => {
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    const raw = params.get("edit");
+    const parsed = raw ? parseInt(raw) : NaN;
+    return !isNaN(parsed) && isShowroom ? parsed : null;
+  })();
+  const isEdit = editId !== null;
+  const { data: editBike } = useGetBike(editId ?? 0, { query: { enabled: isEdit } } as any);
+  const [prefilled, setPrefilled] = useState(false);
 
   const [mainType, setMainType] = useState<MainType | "">("");
   const [bicycleCategory, setBicycleCategory] = useState("");
@@ -55,6 +79,32 @@ export default function SellPage() {
     hasDocuments: false,
     phone: "",
   });
+
+  useEffect(() => {
+    if (!isEdit || !editBike || prefilled) return;
+    const cat = editBike.category;
+    if (cat === "electric") setMainType("electric");
+    else if (cat === "motorcycle") setMainType("motorcycle");
+    else {
+      setMainType("bicycle");
+      setBicycleCategory(cat);
+    }
+    setImages(editBike.images ?? []);
+    setForm({
+      title: editBike.title ?? "",
+      description: editBike.description ?? "",
+      price: String(editBike.price ?? ""),
+      condition: editBike.condition ?? "",
+      brand: editBike.brand ?? "",
+      mileage: editBike.mileage != null ? String(editBike.mileage) : "",
+      engineCapacity: editBike.engineCapacity != null ? String(editBike.engineCapacity) : "",
+      province: editBike.province ?? "",
+      hasDelivery: !!editBike.hasDelivery,
+      hasDocuments: !!editBike.hasDocuments,
+      phone: editBike.phone ?? "",
+    });
+    setPrefilled(true);
+  }, [isEdit, editBike, prefilled]);
 
   const resolvedCategory =
     mainType === "bicycle" ? bicycleCategory : mainType === "electric" ? "electric" : mainType === "motorcycle" ? "motorcycle" : "";
@@ -89,28 +139,68 @@ export default function SellPage() {
       return;
     }
 
-    createBike.mutate(
-      {
-        data: {
-          title: form.title,
-          description: form.description || undefined,
-          price: parseFloat(form.price),
-          category: resolvedCategory,
-          condition: form.condition,
-          brand: form.brand || undefined,
-          phone: form.phone,
-          images,
-          province: form.province,
-          hasDelivery: form.hasDelivery,
-          ...(mainType === "motorcycle" && form.mileage ? { mileage: parseInt(form.mileage) } : {}),
-          ...(mainType === "motorcycle" && form.engineCapacity ? { engineCapacity: parseInt(form.engineCapacity) } : {}),
-          ...(mainType === "motorcycle" ? { hasDocuments: form.hasDocuments } : {}),
+    const data = {
+      title: form.title,
+      description: form.description || undefined,
+      price: parseFloat(form.price),
+      category: resolvedCategory,
+      condition: form.condition,
+      brand: form.brand || undefined,
+      phone: form.phone,
+      images,
+      province: form.province,
+      hasDelivery: form.hasDelivery,
+      ...(mainType === "motorcycle" && form.mileage ? { mileage: parseInt(form.mileage) } : {}),
+      ...(mainType === "motorcycle" && form.engineCapacity ? { engineCapacity: parseInt(form.engineCapacity) } : {}),
+      ...(mainType === "motorcycle" ? { hasDocuments: form.hasDocuments } : {}),
+    };
+
+    const invalidateAll = () => {
+      qc.invalidateQueries({ queryKey: getListBikesQueryKey() });
+      qc.invalidateQueries({ queryKey: getGetMyBikesQueryKey() });
+      if (isShowroom) qc.invalidateQueries({ queryKey: getShowroomListBikesQueryKey() });
+    };
+
+    if (isEdit && editId) {
+      showroomUpdateBike.mutate(
+        { id: editId, data },
+        {
+          onSuccess: () => {
+            invalidateAll();
+            qc.invalidateQueries({ queryKey: getGetBikeQueryKey(editId) });
+            toast({ title: "تم تحديث الإعلان بنجاح!" });
+            navigate("/showroom");
+          },
+          onError: () => {
+            toast({ title: "فشل تحديث الإعلان. حاول مرة أخرى.", variant: "destructive" });
+          },
         },
-      },
+      );
+      return;
+    }
+
+    if (isShowroom) {
+      showroomCreateBike.mutate(
+        { data },
+        {
+          onSuccess: () => {
+            invalidateAll();
+            toast({ title: "تم نشر الإعلان بنجاح!" });
+            navigate("/showroom");
+          },
+          onError: () => {
+            toast({ title: "فشل نشر الإعلان. حاول مرة أخرى.", variant: "destructive" });
+          },
+        },
+      );
+      return;
+    }
+
+    createBike.mutate(
+      { data },
       {
         onSuccess: () => {
-          qc.invalidateQueries({ queryKey: getListBikesQueryKey() });
-          qc.invalidateQueries({ queryKey: getGetMyBikesQueryKey() });
+          invalidateAll();
           toast({ title: "تم نشر الإعلان بنجاح!" });
           navigate("/my-listings");
         },
@@ -121,13 +211,23 @@ export default function SellPage() {
     );
   };
 
+  const isPending = createBike.isPending || showroomCreateBike.isPending || showroomUpdateBike.isPending;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-foreground mb-2">بيع دراجتك</h1>
-          <p className="text-muted-foreground">انشر دراجتك مجاناً وتواصل مع المشترين مباشرة.</p>
+          <h1 className="text-3xl font-black text-foreground mb-2">
+            {isEdit ? "تعديل الإعلان" : isShowroom ? "إضافة منتج جديد" : "بيع دراجتك"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isEdit
+              ? "عدّل تفاصيل الإعلان ثم احفظ التغييرات."
+              : isShowroom
+                ? `إضافة منتج جديد إلى صالة عرض ${account?.showroom?.name ?? ""}`
+                : "انشر دراجتك مجاناً وتواصل مع المشترين مباشرة."}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -309,7 +409,7 @@ export default function SellPage() {
                   <div className="flex gap-2">
                     {[
                       { value: true, label: "مع أوراق رسمية" },
-                      { value: false, label: "بدون أوراق" },
+                      { value: false, label: "بدون أوراق رسمية" },
                     ].map((d) => (
                       <button
                         type="button"
@@ -435,10 +535,16 @@ export default function SellPage() {
 
           <Button
             type="submit"
-            disabled={createBike.isPending || isUploading}
+            disabled={isPending || isUploading}
             className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-md"
           >
-            {createBike.isPending ? "جاري النشر..." : "انشر الإعلان مجاناً"}
+            {isPending
+              ? isEdit
+                ? "جاري الحفظ..."
+                : "جاري النشر..."
+              : isEdit
+                ? "حفظ التغييرات"
+                : "انشر الإعلان مجاناً"}
           </Button>
         </form>
       </div>

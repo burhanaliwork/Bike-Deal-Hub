@@ -16,9 +16,212 @@ tags:
     description: User favorites
   - name: admin
     description: Admin operations
+  - name: auth
+    description: Account authentication (admin and showroom accounts)
+  - name: showrooms
+    description: Showroom (dealer) operations
   - name: Storage
     description: Object storage upload and serving endpoints.
 paths:
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current account info
+      responses:
+        "200":
+          description: Account info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountInfo"
+        "401":
+          description: Unauthorized
+
+  /showrooms/{id}:
+    get:
+      operationId: getShowroom
+      tags: [showrooms]
+      summary: Get public showroom profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Showroom profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Showroom"
+        "404":
+          description: Not found
+
+  /admin/showrooms:
+    get:
+      operationId: adminListShowrooms
+      tags: [admin]
+      summary: Admin - list all showrooms
+      responses:
+        "200":
+          description: All showrooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Showroom"
+    post:
+      operationId: adminCreateShowroom
+      tags: [admin]
+      summary: Admin - create showroom with its account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShowroomBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Showroom"
+        "409":
+          description: Username already exists
+
+  /admin/showrooms/{id}:
+    put:
+      operationId: adminUpdateShowroom
+      tags: [admin]
+      summary: Admin - update showroom (optionally reset password)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShowroomBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Showroom"
+    delete:
+      operationId: adminDeleteShowroom
+      tags: [admin]
+      summary: Admin - delete showroom, its account and its bikes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /showroom/bikes:
+    get:
+      operationId: showroomListBikes
+      tags: [showrooms]
+      summary: Showroom - list own bikes
+      responses:
+        "200":
+          description: Showroom's bikes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bike"
+    post:
+      operationId: showroomCreateBike
+      tags: [showrooms]
+      summary: Showroom - create a bike listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBikeBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+
+  /showroom/bikes/{id}:
+    put:
+      operationId: showroomUpdateBike
+      tags: [showrooms]
+      summary: Showroom - update own bike listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShowroomBikeBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bike"
+    delete:
+      operationId: showroomDeleteBike
+      tags: [showrooms]
+      summary: Showroom - delete own bike listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /healthz:
     get:
       operationId: healthCheck
@@ -78,6 +281,14 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: hasDocuments
+          in: query
+          schema:
+            type: boolean
+        - name: showroomId
+          in: query
+          schema:
+            type: integer
       responses:
         "200":
           description: List of bikes
@@ -456,6 +667,12 @@ components:
         status:
           type: string
           description: "active, pending, sold, rejected"
+        showroomId:
+          type: integer
+          nullable: true
+        showroom:
+          $ref: "#/components/schemas/ShowroomSummary"
+          nullable: true
         userId:
           type: string
         userName:
@@ -559,6 +776,175 @@ components:
           type: string
       required:
         - status
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthSession:
+      type: object
+      properties:
+        token:
+          type: string
+        username:
+          type: string
+        role:
+          type: string
+          description: "admin or showroom"
+        showroom:
+          $ref: "#/components/schemas/ShowroomSummary"
+          nullable: true
+      required:
+        - token
+        - username
+        - role
+
+    AccountInfo:
+      type: object
+      properties:
+        username:
+          type: string
+        role:
+          type: string
+        showroom:
+          $ref: "#/components/schemas/ShowroomSummary"
+          nullable: true
+      required:
+        - username
+        - role
+
+    ShowroomSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        googleMapsUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+      required:
+        - id
+        - name
+        - verified
+
+    Showroom:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        googleMapsUrl:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+        username:
+          type: string
+          nullable: true
+        bikesCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - verified
+
+    CreateShowroomBody:
+      type: object
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+        googleMapsUrl:
+          type: string
+        phone:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - username
+        - password
+
+    UpdateShowroomBody:
+      type: object
+      properties:
+        name:
+          type: string
+        imageUrl:
+          type: string
+        googleMapsUrl:
+          type: string
+        phone:
+          type: string
+        verified:
+          type: boolean
+        password:
+          type: string
+          description: "if provided, resets the showroom account password"
+
+    UpdateShowroomBikeBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        condition:
+          type: string
+        brand:
+          type: string
+        phone:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        mileage:
+          type: number
+        engineCapacity:
+          type: number
+        province:
+          type: string
+        hasDelivery:
+          type: boolean
+        hasDocuments:
+          type: boolean
+        status:
+          type: string
+          description: "active or sold"
 
     MarketplaceStats:
       type: object

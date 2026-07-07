@@ -9,6 +9,15 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface ShowroomSummary {
+  id: number;
+  name: string;
+  imageUrl?: string | null;
+  googleMapsUrl?: string | null;
+  phone?: string | null;
+  verified: boolean;
+}
+
 export interface Bike {
   id: number;
   title: string;
@@ -31,6 +40,8 @@ export interface Bike {
   hasDocuments?: boolean;
   /** active, pending, sold, rejected */
   status: string;
+  showroomId?: number | null;
+  showroom?: ShowroomSummary | null;
   userId: string;
   userName?: string;
   userEmail?: string;
@@ -73,6 +84,74 @@ export interface UpdateBikeBody {
 
 export interface UpdateBikeStatusBody {
   status: string;
+}
+
+export interface LoginBody {
+  username: string;
+  password: string;
+}
+
+export interface AuthSession {
+  token: string;
+  username: string;
+  /** admin or showroom */
+  role: string;
+  showroom?: ShowroomSummary | null;
+}
+
+export interface AccountInfo {
+  username: string;
+  role: string;
+  showroom?: ShowroomSummary | null;
+}
+
+export interface Showroom {
+  id: number;
+  name: string;
+  imageUrl?: string | null;
+  googleMapsUrl?: string | null;
+  phone?: string | null;
+  verified: boolean;
+  username?: string | null;
+  bikesCount?: number;
+  createdAt?: string;
+}
+
+export interface CreateShowroomBody {
+  name: string;
+  imageUrl?: string;
+  googleMapsUrl?: string;
+  phone?: string;
+  username: string;
+  password: string;
+}
+
+export interface UpdateShowroomBody {
+  name?: string;
+  imageUrl?: string;
+  googleMapsUrl?: string;
+  phone?: string;
+  verified?: boolean;
+  /** if provided, resets the showroom account password */
+  password?: string;
+}
+
+export interface UpdateShowroomBikeBody {
+  title?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  condition?: string;
+  brand?: string;
+  phone?: string;
+  images?: string[];
+  mileage?: number;
+  engineCapacity?: number;
+  province?: string;
+  hasDelivery?: boolean;
+  hasDocuments?: boolean;
+  /** active or sold */
+  status?: string;
 }
 
 export type MarketplaceStatsCategoryBreakdownItem = {
@@ -148,4 +227,6 @@ export type ListBikesParams = {
   maxMileage?: number;
   province?: string;
   hasDelivery?: boolean;
+  hasDocuments?: boolean;
+  showroomId?: number;
 };

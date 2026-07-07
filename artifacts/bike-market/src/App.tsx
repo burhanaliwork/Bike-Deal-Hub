@@ -7,6 +7,7 @@ import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/queryClient";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
+import { getStoredAuth } from "@/lib/accountAuth";
 import HomePage from "@/pages/home";
 import ListingsPage from "@/pages/listings";
 import BikeDetailPage from "@/pages/bike-detail";
@@ -14,6 +15,9 @@ import MyListingsPage from "@/pages/my-listings";
 import SellPage from "@/pages/sell";
 import FavoritesPage from "@/pages/favorites";
 import AdminPage from "@/pages/admin";
+import LoginPage from "@/pages/login";
+import ShowroomDashboardPage from "@/pages/showroom-dashboard";
+import ShowroomPage from "@/pages/showroom";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -84,7 +88,11 @@ const clerkAppearance = {
 function AuthTokenSetter() {
   const { getToken } = useAuth();
   useEffect(() => {
-    setAuthTokenGetter(() => getToken());
+    setAuthTokenGetter(async () => {
+      const stored = getStoredAuth();
+      if (stored?.token) return stored.token;
+      return getToken();
+    });
   }, [getToken]);
   return null;
 }
@@ -118,6 +126,9 @@ function Router() {
       <Route path="/sell" component={SellPage} />
       <Route path="/favorites" component={FavoritesPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/showroom" component={ShowroomDashboardPage} />
+      <Route path="/showrooms/:id" component={ShowroomPage} />
       <Route component={NotFound} />
     </Switch>
   );

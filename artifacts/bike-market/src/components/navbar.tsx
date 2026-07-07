@@ -1,11 +1,13 @@
 import { Link } from "wouter";
-import { Search } from "lucide-react";
+import { Search, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import FilterDrawer from "@/components/filter-drawer";
+import { useAccountAuth } from "@/lib/accountAuth";
 
 export default function Navbar() {
   const [filterOpen, setFilterOpen] = useState(false);
+  const account = useAccountAuth();
 
   return (
     <>
@@ -32,6 +34,20 @@ export default function Navbar() {
                   بيع دراجتك
                 </Button>
               </Link>
+
+              {/* Dashboard link for logged-in accounts */}
+              {account && (
+                <Link href={account.role === "admin" ? "/admin" : "/showroom"}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 border-primary/30 text-primary hover:bg-primary/5 font-semibold"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    لوحة التحكم
+                  </Button>
+                </Link>
+              )}
             </div>
 
             {/* Right side — logo */}
