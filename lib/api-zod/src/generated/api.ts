@@ -54,6 +54,10 @@ export const ListBikesResponseItem = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -80,6 +84,7 @@ export const CreateBikeBody = zod.object({
   engineCapacity: zod.number().optional(),
   province: zod.string(),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod.boolean().optional(),
 });
 
 /**
@@ -113,6 +118,10 @@ export const GetBikeResponse = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -142,6 +151,7 @@ export const UpdateBikeBody = zod.object({
   engineCapacity: zod.number().optional(),
   province: zod.string().optional(),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod.boolean().optional(),
 });
 
 export const UpdateBikeResponse = zod.object({
@@ -168,6 +178,10 @@ export const UpdateBikeResponse = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -211,6 +225,10 @@ export const GetMyBikesResponseItem = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -259,6 +277,10 @@ export const GetBikeStatsResponse = zod.object({
         .optional()
         .describe("one of the 18 Iraqi governorates"),
       hasDelivery: zod.boolean().optional(),
+      hasDocuments: zod
+        .boolean()
+        .optional()
+        .describe("motorcycle has official registration papers"),
       status: zod.string().describe("active, pending, sold, rejected"),
       userId: zod.string(),
       userName: zod.string().optional(),
@@ -297,6 +319,10 @@ export const GetFavoritesResponseItem = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -362,6 +388,10 @@ export const AdminListBikesResponseItem = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),
@@ -407,6 +437,10 @@ export const AdminUpdateBikeStatusResponse = zod.object({
     .optional()
     .describe("one of the 18 Iraqi governorates"),
   hasDelivery: zod.boolean().optional(),
+  hasDocuments: zod
+    .boolean()
+    .optional()
+    .describe("motorcycle has official registration papers"),
   status: zod.string().describe("active, pending, sold, rejected"),
   userId: zod.string(),
   userName: zod.string().optional(),

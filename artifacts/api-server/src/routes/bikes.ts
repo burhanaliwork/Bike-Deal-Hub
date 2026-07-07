@@ -102,7 +102,7 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
 
     await upsertUser(userId, userName, userEmail);
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery } = req.body;
+    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
     if (!title || !price || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -122,6 +122,7 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
         engineCapacity: engineCapacity !== undefined && engineCapacity !== null ? parseInt(engineCapacity) : undefined,
         province,
         hasDelivery: !!hasDelivery,
+        hasDocuments: !!hasDocuments,
         status: "active",
         userId,
         userName,
@@ -224,7 +225,7 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
     if (!existing) return res.status(404).json({ error: "Not found" });
     if (existing.userId !== userId) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery } = req.body;
+    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
     const [updated] = await db
       .update(bikesTable)
       .set({
@@ -240,6 +241,7 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
         ...(engineCapacity !== undefined && { engineCapacity: engineCapacity !== null ? parseInt(engineCapacity) : null }),
         ...(province !== undefined && { province }),
         ...(hasDelivery !== undefined && { hasDelivery: !!hasDelivery }),
+        ...(hasDocuments !== undefined && { hasDocuments: !!hasDocuments }),
         updatedAt: new Date(),
       })
       .where(eq(bikesTable.id, id))

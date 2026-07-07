@@ -74,9 +74,9 @@ export default function HomePage() {
       <footer className="bg-[#060e1e] text-gray-500 py-6 mt-4">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-2">
-            <img src="/logo.svg" alt="Ride IQ" className="h-7 w-auto brightness-0 invert opacity-50" />
+            <img src="/logo.svg" alt="motorby" className="h-7 w-auto brightness-0 invert opacity-50" />
           </div>
-          <p className="text-xs">© 2025 Ride IQ — منصة الدراجات الأولى في العراق</p>
+          <p className="text-xs">© 2025 motorby — منصة الدراجات الأولى في العراق</p>
         </div>
       </footer>
     </div>

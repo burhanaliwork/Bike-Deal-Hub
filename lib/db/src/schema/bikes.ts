@@ -16,6 +16,7 @@ export const bikesTable = pgTable("bikes", {
   engineCapacity: integer("engine_capacity"),
   province: text("province"),
   hasDelivery: boolean("has_delivery").notNull().default(false),
+  hasDocuments: boolean("has_documents").notNull().default(false),
   status: text("status").notNull().default("active"),
   userId: text("user_id").notNull(),
   userName: text("user_name"),

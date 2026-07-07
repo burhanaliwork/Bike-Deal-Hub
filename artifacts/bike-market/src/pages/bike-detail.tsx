@@ -263,6 +263,15 @@ export default function BikeDetailPage() {
                     {Number(bike.mileage).toLocaleString()} كم
                   </span>
                 )}
+                {bike.category === "motorcycle" && (
+                  <span className={cn(
+                    "flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium",
+                    bike.hasDocuments ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
+                  )}>
+                    <Tag className="w-4 h-4" />
+                    {bike.hasDocuments ? "مع أوراق رسمية" : "بدون أوراق"}
+                  </span>
+                )}
               </div>
 
               {bike.description && (

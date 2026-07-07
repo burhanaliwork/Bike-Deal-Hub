@@ -450,6 +450,9 @@ components:
           description: "one of the 18 Iraqi governorates"
         hasDelivery:
           type: boolean
+        hasDocuments:
+          type: boolean
+          description: "motorcycle has official registration papers"
         status:
           type: string
           description: "active, pending, sold, rejected"
@@ -507,6 +510,8 @@ components:
           type: string
         hasDelivery:
           type: boolean
+        hasDocuments:
+          type: boolean
       required:
         - title
         - price
@@ -543,6 +548,8 @@ components:
         province:
           type: string
         hasDelivery:
+          type: boolean
+        hasDocuments:
           type: boolean
 
     UpdateBikeStatusBody:

@@ -23,7 +23,7 @@ export default function Navbar() {
                 onClick={() => setFilterOpen(true)}
               >
                 <Search className="w-4 h-4" />
-                بحث
+                فلتر
               </Button>
 
               {/* Add listing button */}
@@ -36,7 +36,7 @@ export default function Navbar() {
 
             {/* Right side — logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
-              <img src="/logo.svg" alt="Ride IQ" className="h-9 w-auto" />
+              <img src="/logo.svg" alt="motorby" className="h-9 w-auto" />
             </Link>
           </div>
         </div>

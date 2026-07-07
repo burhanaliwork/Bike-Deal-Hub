@@ -27,6 +27,8 @@ export interface Bike {
   /** one of the 18 Iraqi governorates */
   province?: string;
   hasDelivery?: boolean;
+  /** motorcycle has official registration papers */
+  hasDocuments?: boolean;
   /** active, pending, sold, rejected */
   status: string;
   userId: string;
@@ -50,6 +52,7 @@ export interface CreateBikeBody {
   engineCapacity?: number;
   province: string;
   hasDelivery?: boolean;
+  hasDocuments?: boolean;
 }
 
 export interface UpdateBikeBody {
@@ -65,6 +68,7 @@ export interface UpdateBikeBody {
   engineCapacity?: number;
   province?: string;
   hasDelivery?: boolean;
+  hasDocuments?: boolean;
 }
 
 export interface UpdateBikeStatusBody {

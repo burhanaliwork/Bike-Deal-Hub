@@ -52,6 +52,7 @@ export default function SellPage() {
     engineCapacity: "",
     province: "",
     hasDelivery: false,
+    hasDocuments: false,
     phone: "",
   });
 
@@ -103,6 +104,7 @@ export default function SellPage() {
           hasDelivery: form.hasDelivery,
           ...(mainType === "motorcycle" && form.mileage ? { mileage: parseInt(form.mileage) } : {}),
           ...(mainType === "motorcycle" && form.engineCapacity ? { engineCapacity: parseInt(form.engineCapacity) } : {}),
+          ...(mainType === "motorcycle" ? { hasDocuments: form.hasDocuments } : {}),
         },
       },
       {
@@ -269,37 +271,64 @@ export default function SellPage() {
             </div>
 
             {mainType === "motorcycle" && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="mileage">الممشى (كم)</Label>
-                  <div className="relative">
-                    <Gauge className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="mileage"
-                      type="number"
-                      className="pr-9"
-                      value={form.mileage}
-                      onChange={(e) => setForm({ ...form, mileage: e.target.value })}
-                      min="0"
-                    />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="mileage">الممشى (كم)</Label>
+                    <div className="relative">
+                      <Gauge className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="mileage"
+                        type="number"
+                        className="pr-9"
+                        value={form.mileage}
+                        onChange={(e) => setForm({ ...form, mileage: e.target.value })}
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="engineCapacity">سعة المحرك (سي سي)</Label>
+                    <div className="relative">
+                      <Cog className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="engineCapacity"
+                        type="number"
+                        className="pr-9"
+                        value={form.engineCapacity}
+                        onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })}
+                        min="0"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="engineCapacity">سعة المحرك (سي سي)</Label>
-                  <div className="relative">
-                    <Cog className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="engineCapacity"
-                      type="number"
-                      className="pr-9"
-                      value={form.engineCapacity}
-                      onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })}
-                      min="0"
-                    />
+                  <Label>الأوراق الرسمية <span className="text-red-500">*</span></Label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: true, label: "مع أوراق رسمية" },
+                      { value: false, label: "بدون أوراق" },
+                    ].map((d) => (
+                      <button
+                        type="button"
+                        key={String(d.value)}
+                        onClick={() => setForm({ ...form, hasDocuments: d.value })}
+                        className={cn(
+                          "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
+                          form.hasDocuments === d.value
+                            ? "border-primary bg-primary text-white"
+                            : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                        )}
+                      >
+                        <FileText className="w-4 h-4" />
+                        {d.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
+              </>
             )}
 
             <div className="space-y-1.5">
