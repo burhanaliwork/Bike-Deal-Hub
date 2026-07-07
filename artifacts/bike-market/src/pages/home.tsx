@@ -15,26 +15,18 @@ export default function HomePage() {
 
       {/* CTA Banner */}
       <section className="bg-[#0D1B35] overflow-hidden">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 flex items-center gap-4">
-          {/* Text — right side (RTL) */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-white font-black text-xl leading-tight mb-1">
-              بيع دراجتك اليوم مجاناً
-            </h2>
-            <p className="text-blue-200 text-sm mb-3 leading-relaxed">
-              انشر إعلانك خلال دقيقتين وتواصل مع المشترين مباشرة.
-            </p>
-            <Link href="/sell">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold px-5 h-9 transition-all duration-300 ease-out">
-                بيع دراجتك الآن
-              </Button>
-            </Link>
-          </div>
-
-          {/* Illustration — left side */}
-          <div className="w-36 h-24 flex-shrink-0 opacity-90">
-            <BikeCTAIllustration />
-          </div>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
+          <h2 className="text-white font-black text-xl leading-tight mb-1">
+            بيع دراجتك اليوم مجاناً
+          </h2>
+          <p className="text-blue-200 text-sm mb-3 leading-relaxed">
+            انشر إعلانك خلال دقيقتين وتواصل مع المشترين مباشرة.
+          </p>
+          <Link href="/sell">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold px-5 h-9 transition-all duration-300 ease-out">
+              بيع دراجتك الآن
+            </Button>
+          </Link>
         </div>
       </section>
 
