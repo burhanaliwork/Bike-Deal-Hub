@@ -22,7 +22,9 @@ export interface Bike {
   id: number;
   title: string;
   description?: string;
-  price: number;
+  price?: number | null;
+  /** when true, price is hidden and buyer must contact seller */
+  priceOnRequest?: boolean;
   /** electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids */
   category: string;
   /** new, used */
@@ -53,7 +55,8 @@ export interface Bike {
 export interface CreateBikeBody {
   title: string;
   description?: string;
-  price: number;
+  price?: number;
+  priceOnRequest?: boolean;
   category: string;
   condition: string;
   brand?: string;
@@ -70,6 +73,7 @@ export interface UpdateBikeBody {
   title?: string;
   description?: string;
   price?: number;
+  priceOnRequest?: boolean;
   category?: string;
   condition?: string;
   brand?: string;

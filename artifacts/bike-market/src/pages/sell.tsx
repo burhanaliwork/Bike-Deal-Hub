@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Bike, Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2, MapPin, Truck, Cog } from "lucide-react";
+import { Bike, Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2, MapPin, Truck, Cog, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IRAQ_PROVINCES } from "@/lib/provinces";
 
@@ -70,6 +70,7 @@ export default function SellPage() {
     title: "",
     description: "",
     price: "",
+    priceOnRequest: false,
     condition: "",
     brand: "",
     mileage: "",
@@ -93,7 +94,8 @@ export default function SellPage() {
     setForm({
       title: editBike.title ?? "",
       description: editBike.description ?? "",
-      price: String(editBike.price ?? ""),
+      price: editBike.priceOnRequest ? "" : String(editBike.price ?? ""),
+      priceOnRequest: !!editBike.priceOnRequest,
       condition: editBike.condition ?? "",
       brand: editBike.brand ?? "",
       mileage: editBike.mileage != null ? String(editBike.mileage) : "",
@@ -126,7 +128,7 @@ export default function SellPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.price || !resolvedCategory || !form.condition || !form.province || !form.phone) {
+    if (!form.title || (!form.price && !form.priceOnRequest) || !resolvedCategory || !form.condition || !form.province || !form.phone) {
       toast({ title: "الرجاء تعبئة جميع الحقول المطلوبة", variant: "destructive" });
       return;
     }
@@ -142,7 +144,7 @@ export default function SellPage() {
     const data = {
       title: form.title,
       description: form.description || undefined,
-      price: parseFloat(form.price),
+      ...(form.priceOnRequest ? { priceOnRequest: true } : { price: parseFloat(form.price) }),
       category: resolvedCategory,
       condition: form.condition,
       brand: form.brand || undefined,
@@ -218,6 +220,14 @@ export default function SellPage() {
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 group"
+          >
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            رجوع
+          </button>
           <h1 className="text-3xl font-black text-foreground mb-2">
             {isEdit ? "تعديل الإعلان" : isShowroom ? "إضافة منتج جديد" : "بيع دراجتك"}
           </h1>
@@ -320,19 +330,53 @@ export default function SellPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="price">السعر (د.ع) <span className="text-red-500">*</span></Label>
-                <div className="relative">
-                  <Coins className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="price"
-                    type="number"
-                    className="pr-9"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    min="0"
-                    required
-                  />
+                <Label>السعر <span className="text-red-500">*</span></Label>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, priceOnRequest: false })}
+                    className={cn(
+                      "flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all",
+                      !form.priceOnRequest
+                        ? "border-primary bg-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50"
+                    )}
+                  >
+                    سعر محدد
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, priceOnRequest: true, price: "" })}
+                    className={cn(
+                      "flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all",
+                      form.priceOnRequest
+                        ? "border-primary bg-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-primary/50"
+                    )}
+                  >
+                    يرجى طلب السعر
+                  </button>
                 </div>
+                {!form.priceOnRequest && (
+                  <div className="relative">
+                    <Coins className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="price"
+                      type="number"
+                      className="pr-9"
+                      placeholder="السعر بالدينار العراقي"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
+                      min="0"
+                    />
+                  </div>
+                )}
+                {form.priceOnRequest && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg">
+                    <Coins className="w-4 h-4 text-primary" />
+                    سيظهر "يرجى طلب السعر" على إعلانك
+                  </div>
+                )}
               </div>
             </div>
 

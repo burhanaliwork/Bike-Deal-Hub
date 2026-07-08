@@ -243,7 +243,10 @@ export default function BikeDetailPage() {
               </div>
 
               <div className="text-3xl font-black text-primary mb-4">
-                {Number(bike.price).toLocaleString()} <span className="text-lg font-bold">د.ع</span>
+                {bike.priceOnRequest
+                  ? <span className="text-xl font-bold text-muted-foreground">يرجى طلب السعر</span>
+                  : <>{Number(bike.price).toLocaleString()} <span className="text-lg font-bold">د.ع</span></>
+                }
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">

@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 interface Bike {
   id: number;
   title: string;
-  price: number;
+  price: number | null;
+  priceOnRequest?: boolean;
   category: string;
   condition: string;
   brand?: string;
@@ -92,7 +93,10 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
         {/* Price */}
         <div className="text-lg font-black text-primary leading-none mt-auto">
-          {bike.price.toLocaleString()} <span className="text-sm font-bold">د.ع</span>
+          {bike.priceOnRequest
+            ? <span className="text-sm font-bold text-muted-foreground">يرجى طلب السعر</span>
+            : <>{(bike.price ?? 0).toLocaleString()} <span className="text-sm font-bold">د.ع</span></>
+          }
         </div>
 
         {/* Details link */}

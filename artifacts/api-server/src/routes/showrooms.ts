@@ -26,7 +26,7 @@ function showroomResponse(s: any, extra: Record<string, any> = {}) {
 function buildBikeResponse(bike: any, showroom: any = null) {
   return {
     ...bike,
-    price: parseFloat(bike.price),
+    price: bike.price != null ? parseFloat(bike.price) : null,
     isFavorited: false,
     showroom: showroom
       ? {
@@ -221,8 +221,8 @@ router.post("/showroom/bikes", requireShowroomAccount, async (req: any, res: any
     const [showroom] = await db.select().from(showroomsTable).where(eq(showroomsTable.id, account.showroomId!));
     if (!showroom) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
-    if (!title || !price || !category || !condition || !phone || !province) {
+    const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
+    if (!title || (!price && !priceOnRequest) || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -231,7 +231,8 @@ router.post("/showroom/bikes", requireShowroomAccount, async (req: any, res: any
       .values({
         title,
         description,
-        price: price.toString(),
+        price: priceOnRequest ? null : price?.toString(),
+        priceOnRequest: !!priceOnRequest,
         category,
         condition,
         brand,
@@ -267,13 +268,14 @@ router.put("/showroom/bikes/:id", requireShowroomAccount, async (req: any, res: 
     if (!existing) return res.status(404).json({ error: "Not found" });
     if (existing.showroomId !== account.showroomId) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments, status } = req.body;
+    const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments, status } = req.body;
     const [updated] = await db
       .update(bikesTable)
       .set({
         ...(title && { title }),
         ...(description !== undefined && { description }),
-        ...(price !== undefined && { price: price.toString() }),
+        ...(priceOnRequest !== undefined && { priceOnRequest: !!priceOnRequest }),
+        ...(priceOnRequest ? { price: null } : price !== undefined ? { price: price.toString() } : {}),
         ...(category && { category }),
         ...(condition && { condition }),
         ...(brand !== undefined && { brand }),

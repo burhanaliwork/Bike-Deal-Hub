@@ -34,7 +34,7 @@ async function upsertUser(userId: string, userName?: string, userEmail?: string)
 function buildBikeResponse(bike: any, isFavorited: boolean = false, showroom: any = null) {
   return {
     ...bike,
-    price: parseFloat(bike.price),
+    price: bike.price != null ? parseFloat(bike.price) : null,
     isFavorited,
     showroom: showroom
       ? {
@@ -104,8 +104,8 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
 
     await upsertUser(userId, userName, userEmail);
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
-    if (!title || !price || !category || !condition || !phone || !province) {
+    const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
+    if (!title || (!price && !priceOnRequest) || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -114,7 +114,8 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
       .values({
         title,
         description,
-        price: price.toString(),
+        price: priceOnRequest ? null : price?.toString(),
+        priceOnRequest: !!priceOnRequest,
         category,
         condition,
         brand,
@@ -231,13 +232,14 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
     if (!existing) return res.status(404).json({ error: "Not found" });
     if (existing.userId !== userId) return res.status(403).json({ error: "Forbidden" });
 
-    const { title, description, price, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
+    const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
     const [updated] = await db
       .update(bikesTable)
       .set({
         ...(title && { title }),
         ...(description !== undefined && { description }),
-        ...(price !== undefined && { price: price.toString() }),
+        ...(priceOnRequest !== undefined && { priceOnRequest: !!priceOnRequest }),
+        ...(priceOnRequest ? { price: null } : price !== undefined ? { price: price.toString() } : {}),
         ...(category && { category }),
         ...(condition && { condition }),
         ...(brand !== undefined && { brand }),

@@ -143,7 +143,11 @@ export const ShowroomListBikesResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -196,7 +200,8 @@ export const ShowroomListBikesResponse = zod.array(
 export const ShowroomCreateBikeBody = zod.object({
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().optional(),
+  priceOnRequest: zod.boolean().optional(),
   category: zod.string(),
   condition: zod.string(),
   brand: zod.string().optional(),
@@ -237,7 +242,11 @@ export const ShowroomUpdateBikeResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -317,7 +326,11 @@ export const ListBikesResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -368,7 +381,8 @@ export const ListBikesResponse = zod.array(ListBikesResponseItem);
 export const CreateBikeBody = zod.object({
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().optional(),
+  priceOnRequest: zod.boolean().optional(),
   category: zod.string(),
   condition: zod.string(),
   brand: zod.string().optional(),
@@ -392,7 +406,11 @@ export const GetBikeResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -447,6 +465,7 @@ export const UpdateBikeBody = zod.object({
   title: zod.string().optional(),
   description: zod.string().optional(),
   price: zod.number().optional(),
+  priceOnRequest: zod.boolean().optional(),
   category: zod.string().optional(),
   condition: zod.string().optional(),
   brand: zod.string().optional(),
@@ -463,7 +482,11 @@ export const UpdateBikeResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -521,7 +544,11 @@ export const GetMyBikesResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -584,7 +611,11 @@ export const GetBikeStatsResponse = zod.object({
       id: zod.number(),
       title: zod.string(),
       description: zod.string().optional(),
-      price: zod.number(),
+      price: zod.number().nullish(),
+      priceOnRequest: zod
+        .boolean()
+        .optional()
+        .describe("when true, price is hidden and buyer must contact seller"),
       category: zod
         .string()
         .describe(
@@ -637,7 +668,11 @@ export const GetFavoritesResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -717,7 +752,11 @@ export const AdminListBikesResponseItem = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(
@@ -777,7 +816,11 @@ export const AdminUpdateBikeStatusResponse = zod.object({
   id: zod.number(),
   title: zod.string(),
   description: zod.string().optional(),
-  price: zod.number(),
+  price: zod.number().nullish(),
+  priceOnRequest: zod
+    .boolean()
+    .optional()
+    .describe("when true, price is hidden and buyer must contact seller"),
   category: zod
     .string()
     .describe(

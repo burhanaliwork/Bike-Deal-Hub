@@ -637,6 +637,10 @@ components:
           type: string
         price:
           type: number
+          nullable: true
+        priceOnRequest:
+          type: boolean
+          description: "when true, price is hidden and buyer must contact seller"
         category:
           type: string
           description: "electric, motorcycle, or bicycle sub-type: mountain, road, hybrid, kids"
@@ -690,7 +694,6 @@ components:
       required:
         - id
         - title
-        - price
         - category
         - condition
         - phone
@@ -707,6 +710,8 @@ components:
           type: string
         price:
           type: number
+        priceOnRequest:
+          type: boolean
         category:
           type: string
         condition:
@@ -731,7 +736,6 @@ components:
           type: boolean
       required:
         - title
-        - price
         - category
         - condition
         - phone
@@ -746,6 +750,8 @@ components:
           type: string
         price:
           type: number
+        priceOnRequest:
+          type: boolean
         category:
           type: string
         condition:
