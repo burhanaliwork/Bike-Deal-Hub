@@ -10,7 +10,7 @@ import {
   getShowroomListBikesQueryKey,
   getGetBikeQueryKey,
 } from "@workspace/api-client-react";
-import { useUpload } from "@workspace/object-storage-web";
+import { useImageKitUpload } from "@/hooks/use-imagekit-upload";
 import { useAccountAuth } from "@/lib/accountAuth";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -20,19 +20,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Bike, Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2, MapPin, Truck, Cog, ArrowRight } from "lucide-react";
+import {
+  Phone, Tag, Coins, FileText, Plus, X, Gauge, Loader2,
+  MapPin, Truck, Cog, ArrowRight, Check, Bike,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IRAQ_PROVINCES } from "@/lib/provinces";
 
 type MainType = "electric" | "motorcycle" | "bicycle";
 
-const mainTypes: { value: MainType; label: string }[] = [
-  { value: "electric", label: "كهربائية" },
-  { value: "motorcycle", label: "نارية" },
-  { value: "bicycle", label: "هوائية" },
+const mainTypes: { value: MainType; label: string; emoji: string }[] = [
+  { value: "bicycle", label: "هوائية", emoji: "🚲" },
+  { value: "electric", label: "كهربائية", emoji: "⚡" },
+  { value: "motorcycle", label: "نارية", emoji: "🏍️" },
 ];
 
-const bicycleCategories: { value: string; label: string }[] = [
+const bicycleCategories = [
   { value: "mountain", label: "جبلي" },
   { value: "road", label: "رود" },
   { value: "hybrid", label: "هجين" },
@@ -40,6 +43,10 @@ const bicycleCategories: { value: string; label: string }[] = [
 ];
 
 const MIN_IMAGES = 2;
+const MAX_IMAGES = 7;
+const TOTAL_STEPS = 4;
+
+const stepTitles = ["معلومات التواصل", "تفاصيل الدراجة", "الموقع والسعر", "وصف الدراجة"];
 
 export default function SellPage() {
   const [, navigate] = useLocation();
@@ -50,7 +57,7 @@ export default function SellPage() {
   const createBike = useCreateBike();
   const showroomCreateBike = useShowroomCreateBike();
   const showroomUpdateBike = useShowroomUpdateBike();
-  const { uploadFile, isUploading } = useUpload({ basePath: "/api/storage" });
+  const { uploadFiles, isUploading } = useImageKitUpload();
 
   const editId = (() => {
     const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
@@ -62,11 +69,13 @@ export default function SellPage() {
   const { data: editBike } = useGetBike(editId ?? 0, { query: { enabled: isEdit } } as any);
   const [prefilled, setPrefilled] = useState(false);
 
+  const [step, setStep] = useState(1);
   const [mainType, setMainType] = useState<MainType | "">("");
   const [bicycleCategory, setBicycleCategory] = useState("");
   const [images, setImages] = useState<string[]>([]);
 
   const [form, setForm] = useState({
+    phone: "",
     title: "",
     description: "",
     price: "",
@@ -78,7 +87,6 @@ export default function SellPage() {
     province: "",
     hasDelivery: false,
     hasDocuments: false,
-    phone: "",
   });
 
   useEffect(() => {
@@ -86,12 +94,10 @@ export default function SellPage() {
     const cat = editBike.category;
     if (cat === "electric") setMainType("electric");
     else if (cat === "motorcycle") setMainType("motorcycle");
-    else {
-      setMainType("bicycle");
-      setBicycleCategory(cat);
-    }
+    else { setMainType("bicycle"); setBicycleCategory(cat); }
     setImages(editBike.images ?? []);
     setForm({
+      phone: editBike.phone ?? "",
       title: editBike.title ?? "",
       description: editBike.description ?? "",
       price: editBike.priceOnRequest ? "" : String(editBike.price ?? ""),
@@ -103,44 +109,59 @@ export default function SellPage() {
       province: editBike.province ?? "",
       hasDelivery: !!editBike.hasDelivery,
       hasDocuments: !!editBike.hasDocuments,
-      phone: editBike.phone ?? "",
     });
     setPrefilled(true);
   }, [isEdit, editBike, prefilled]);
 
   const resolvedCategory =
-    mainType === "bicycle" ? bicycleCategory : mainType === "electric" ? "electric" : mainType === "motorcycle" ? "motorcycle" : "";
+    mainType === "bicycle" ? bicycleCategory
+    : mainType === "electric" ? "electric"
+    : mainType === "motorcycle" ? "motorcycle"
+    : "";
 
   const handleFilesSelected = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
-    const files = Array.from(fileList);
-    for (const file of files) {
-      const result = await uploadFile(file);
-      if (result?.objectPath) {
-        setImages((prev) => [...prev, `/api/storage${result.objectPath}`]);
-      }
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) {
+      toast({ title: `الحد الأقصى ${MAX_IMAGES} صور`, variant: "destructive" });
+      return;
+    }
+    const files = Array.from(fileList).slice(0, remaining);
+    try {
+      const urls = await uploadFiles(files);
+      setImages((prev) => [...prev, ...urls]);
+    } catch {
+      toast({ title: "فشل رفع الصور. حاول مرة أخرى.", variant: "destructive" });
     }
   };
 
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  const removeImage = (index: number) => setImages((prev) => prev.filter((_, i) => i !== index));
+
+  const canProceedStep1 = form.phone.trim().length >= 10;
+  const canProceedStep2 = !!mainType && !!form.title && !!form.condition &&
+    images.length >= MIN_IMAGES &&
+    (mainType !== "bicycle" || !!bicycleCategory);
+  const canProceedStep3 = !!form.province && (form.priceOnRequest || !!form.price);
+
+  const handleNext = () => {
+    if (step === 1 && !canProceedStep1) {
+      toast({ title: "أدخل رقم هاتف صحيح (10 أرقام على الأقل)", variant: "destructive" }); return;
+    }
+    if (step === 2) {
+      if (!mainType) { toast({ title: "اختر نوع الدراجة", variant: "destructive" }); return; }
+      if (mainType === "bicycle" && !bicycleCategory) { toast({ title: "اختر فئة الدراجة الهوائية", variant: "destructive" }); return; }
+      if (!form.title) { toast({ title: "أدخل اسم الدراجة", variant: "destructive" }); return; }
+      if (!form.condition) { toast({ title: "اختر حالة الدراجة", variant: "destructive" }); return; }
+      if (images.length < MIN_IMAGES) { toast({ title: `أضف ${MIN_IMAGES} صور على الأقل`, variant: "destructive" }); return; }
+    }
+    if (step === 3 && !canProceedStep3) {
+      toast({ title: "اختر المحافظة وأدخل السعر أو اختر 'يرجى طلب السعر'", variant: "destructive" }); return;
+    }
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title || (!form.price && !form.priceOnRequest) || !resolvedCategory || !form.condition || !form.province || !form.phone) {
-      toast({ title: "الرجاء تعبئة جميع الحقول المطلوبة", variant: "destructive" });
-      return;
-    }
-    if (mainType === "bicycle" && !bicycleCategory) {
-      toast({ title: "الرجاء اختيار فئة الدراجة الهوائية", variant: "destructive" });
-      return;
-    }
-    if (images.length < MIN_IMAGES) {
-      toast({ title: `يرجى إضافة صورتين أو أكثر`, variant: "destructive" });
-      return;
-    }
-
+  const handleSubmit = () => {
     const data = {
       title: form.title,
       description: form.description || undefined,
@@ -164,91 +185,114 @@ export default function SellPage() {
     };
 
     if (isEdit && editId) {
-      showroomUpdateBike.mutate(
-        { id: editId, data },
-        {
-          onSuccess: () => {
-            invalidateAll();
-            qc.invalidateQueries({ queryKey: getGetBikeQueryKey(editId) });
-            toast({ title: "تم تحديث الإعلان بنجاح!" });
-            navigate("/showroom");
-          },
-          onError: () => {
-            toast({ title: "فشل تحديث الإعلان. حاول مرة أخرى.", variant: "destructive" });
-          },
+      showroomUpdateBike.mutate({ id: editId, data }, {
+        onSuccess: () => {
+          invalidateAll();
+          qc.invalidateQueries({ queryKey: getGetBikeQueryKey(editId) });
+          toast({ title: "تم تحديث الإعلان بنجاح!" });
+          navigate("/showroom");
         },
-      );
+        onError: () => toast({ title: "فشل تحديث الإعلان. حاول مرة أخرى.", variant: "destructive" }),
+      });
       return;
     }
 
     if (isShowroom) {
-      showroomCreateBike.mutate(
-        { data },
-        {
-          onSuccess: () => {
-            invalidateAll();
-            toast({ title: "تم نشر الإعلان بنجاح!" });
-            navigate("/showroom");
-          },
-          onError: () => {
-            toast({ title: "فشل نشر الإعلان. حاول مرة أخرى.", variant: "destructive" });
-          },
-        },
-      );
+      showroomCreateBike.mutate({ data }, {
+        onSuccess: () => { invalidateAll(); toast({ title: "تم نشر الإعلان بنجاح!" }); navigate("/showroom"); },
+        onError: () => toast({ title: "فشل نشر الإعلان.", variant: "destructive" }),
+      });
       return;
     }
 
-    createBike.mutate(
-      { data },
-      {
-        onSuccess: () => {
-          invalidateAll();
-          toast({ title: "تم نشر الإعلان بنجاح!" });
-          navigate("/my-listings");
-        },
-        onError: () => {
-          toast({ title: "فشل نشر الإعلان. حاول مرة أخرى.", variant: "destructive" });
-        },
-      }
-    );
+    createBike.mutate({ data }, {
+      onSuccess: () => { invalidateAll(); toast({ title: "تم نشر الإعلان بنجاح!" }); navigate("/my-listings"); },
+      onError: () => toast({ title: "فشل نشر الإعلان.", variant: "destructive" }),
+    });
   };
 
   const isPending = createBike.isPending || showroomCreateBike.isPending || showroomUpdateBike.isPending;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F4F6FA]">
       <Navbar />
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-8">
+        {/* Back button */}
+        <button
+          type="button"
+          onClick={() => step > 1 ? setStep(s => s - 1) : window.history.back()}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 group"
+        >
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          {step > 1 ? "رجوع" : "العودة"}
+        </button>
+
+        {/* Step indicator */}
         <div className="mb-8">
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 group"
-          >
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            رجوع
-          </button>
-          <h1 className="text-3xl font-black text-foreground mb-2">
-            {isEdit ? "تعديل الإعلان" : isShowroom ? "إضافة منتج جديد" : "بيع دراجتك"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isEdit
-              ? "عدّل تفاصيل الإعلان ثم احفظ التغييرات."
-              : isShowroom
-                ? `إضافة منتج جديد إلى صالة عرض ${account?.showroom?.name ?? ""}`
-                : "انشر دراجتك مجاناً وتواصل مع المشترين مباشرة."}
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
+              <div key={s} className="flex items-center flex-1">
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all",
+                  s < step ? "bg-primary text-white" :
+                  s === step ? "bg-primary text-white ring-4 ring-primary/20" :
+                  "bg-gray-200 text-gray-400"
+                )}>
+                  {s < step ? <Check className="w-4 h-4" /> : s}
+                </div>
+                {s < TOTAL_STEPS && (
+                  <div className={cn("h-1 flex-1 mx-1.5 rounded-full transition-all", s < step ? "bg-primary" : "bg-gray-200")} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">الخطوة {step} من {TOTAL_STEPS}</p>
+            <h2 className="text-xl font-black text-[#0D1B35] mt-0.5">{stepTitles[step - 1]}</h2>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-card rounded-xl border border-border p-6 space-y-5">
-            <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <Bike className="w-5 h-5 text-primary" /> تفاصيل الدراجة
-            </h2>
+        {/* Step 1: Contact */}
+        {step === 1 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+              <Phone className="w-5 h-5 text-primary flex-shrink-0" />
+              <p className="text-sm text-blue-800 font-medium">سيتواصل المشترون معك مباشرة على هذا الرقم</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-base font-bold">رقم الهاتف <span className="text-red-500">*</span></Label>
+              <Input
+                id="phone"
+                type="tel"
+                className="h-12 text-lg font-medium text-center tracking-widest"
+                placeholder="07XXXXXXXXX"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                dir="ltr"
+                inputMode="tel"
+              />
+              <p className="text-xs text-muted-foreground text-center">سيستخدم المشترون هذا الرقم للتواصل معك.</p>
+            </div>
+            <Button
+              type="button"
+              onClick={handleNext}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 mt-2"
+              disabled={!canProceedStep1}
+            >
+              التالي
+            </Button>
+          </div>
+        )}
 
-            <div className="space-y-1.5">
-              <Label>نوع الدراجة <span className="text-red-500">*</span></Label>
-              <div className="grid grid-cols-3 gap-2">
+        {/* Step 2: Bike Details */}
+        {step === 2 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6">
+
+            {/* Bike type */}
+            <div className="space-y-2">
+              <Label className="text-base font-bold">نوع الدراجة <span className="text-red-500">*</span></Label>
+              <div className="grid grid-cols-3 gap-3">
                 {mainTypes.map((t) => (
                   <button
                     type="button"
@@ -259,21 +303,23 @@ export default function SellPage() {
                       if (t.value !== "motorcycle") setForm((f) => ({ ...f, mileage: "", engineCapacity: "" }));
                     }}
                     className={cn(
-                      "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all",
+                      "py-3 px-2 rounded-xl border-2 text-sm font-bold transition-all flex flex-col items-center gap-1",
                       mainType === t.value
-                        ? "border-primary bg-primary text-white"
-                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-gray-200 text-gray-500 hover:border-primary/40"
                     )}
                   >
+                    <span className="text-xl">{t.emoji}</span>
                     {t.label}
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Bicycle subcategory */}
             {mainType === "bicycle" && (
-              <div className="space-y-1.5">
-                <Label>فئة الدراجة الهوائية <span className="text-red-500">*</span></Label>
+              <div className="space-y-2">
+                <Label className="text-base font-bold">فئة الدراجة <span className="text-red-500">*</span></Label>
                 <div className="grid grid-cols-4 gap-2">
                   {bicycleCategories.map((c) => (
                     <button
@@ -281,10 +327,8 @@ export default function SellPage() {
                       key={c.value}
                       onClick={() => setBicycleCategory(c.value)}
                       className={cn(
-                        "py-2.5 px-2 rounded-xl border-2 text-xs font-semibold transition-all",
-                        bicycleCategory === c.value
-                          ? "border-primary bg-primary text-white"
-                          : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
+                        "py-2 px-1 rounded-xl border-2 text-xs font-bold transition-all",
+                        bicycleCategory === c.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
                       )}
                     >
                       {c.label}
@@ -294,303 +338,285 @@ export default function SellPage() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="title">اسم الدراجة <span className="text-red-500">*</span></Label>
+            {/* Bike name */}
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-base font-bold">اسم الدراجة <span className="text-red-500">*</span></Label>
               <Input
                 id="title"
+                className="h-11"
+                placeholder="مثال: هوندا سي بي 150"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>الحالة <span className="text-red-500">*</span></Label>
-                <div className="flex gap-2">
-                  {[
-                    { value: "new", label: "جديد" },
-                    { value: "used", label: "مستخدم" },
-                  ].map((c) => (
-                    <button
-                      type="button"
-                      key={c.value}
-                      onClick={() => setForm({ ...form, condition: c.value })}
-                      className={cn(
-                        "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
-                        form.condition === c.value
-                          ? "border-primary bg-primary text-white"
-                          : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
-                      )}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>السعر <span className="text-red-500">*</span></Label>
-                <div className="flex gap-2 mb-2">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, priceOnRequest: false })}
-                    className={cn(
-                      "flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all",
-                      !form.priceOnRequest
-                        ? "border-primary bg-primary text-white"
-                        : "border-gray-200 text-gray-600 hover:border-primary/50"
-                    )}
-                  >
-                    سعر محدد
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, priceOnRequest: true, price: "" })}
-                    className={cn(
-                      "flex-1 py-2 rounded-xl border-2 text-xs font-semibold transition-all",
-                      form.priceOnRequest
-                        ? "border-primary bg-primary text-white"
-                        : "border-gray-200 text-gray-600 hover:border-primary/50"
-                    )}
-                  >
-                    يرجى طلب السعر
-                  </button>
-                </div>
-                {!form.priceOnRequest && (
-                  <div className="relative">
-                    <Coins className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="price"
-                      type="number"
-                      className="pr-9"
-                      placeholder="السعر بالدينار العراقي"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      min="0"
-                    />
-                  </div>
-                )}
-                {form.priceOnRequest && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg">
-                    <Coins className="w-4 h-4 text-primary" />
-                    سيظهر "يرجى طلب السعر" على إعلانك
-                  </div>
-                )}
+            {/* Brand */}
+            <div className="space-y-2">
+              <Label htmlFor="brand" className="text-base font-bold">شركة الدراجة</Label>
+              <div className="relative">
+                <Tag className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="brand"
+                  className="pr-9 h-11"
+                  placeholder="مثال: Honda"
+                  value={form.brand}
+                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="brand">اسم شركة الدراجة</Label>
-                <div className="relative">
-                  <Tag className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="brand"
-                    className="pr-9"
-                    value={form.brand}
-                    onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>العنوان <span className="text-red-500">*</span></Label>
-                <div className="relative">
-                  <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-                  <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })}>
-                    <SelectTrigger className="pr-9">
-                      <SelectValue placeholder="اختر المحافظة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {IRAQ_PROVINCES.map((p) => (
-                        <SelectItem key={p} value={p}>
-                          {p}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            {/* Condition */}
+            <div className="space-y-2">
+              <Label className="text-base font-bold">حالة الدراجة <span className="text-red-500">*</span></Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[{ value: "new", label: "جديدة ✨" }, { value: "used", label: "مستعملة 🔧" }].map((c) => (
+                  <button
+                    type="button"
+                    key={c.value}
+                    onClick={() => setForm({ ...form, condition: c.value })}
+                    className={cn(
+                      "py-3 rounded-xl border-2 text-sm font-bold transition-all",
+                      form.condition === c.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* Motorcycle extras */}
             {mainType === "motorcycle" && (
-              <>
+              <div className="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm font-bold text-gray-700">معلومات إضافية للدراجة النارية</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="mileage">الممشى (كم)</Label>
+                    <Label htmlFor="mileage" className="text-sm font-semibold">الممشى (كم)</Label>
                     <div className="relative">
                       <Gauge className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="mileage"
-                        type="number"
-                        className="pr-9"
-                        value={form.mileage}
-                        onChange={(e) => setForm({ ...form, mileage: e.target.value })}
-                        min="0"
-                      />
+                      <Input id="mileage" type="number" className="pr-9 h-10" value={form.mileage}
+                        onChange={(e) => setForm({ ...form, mileage: e.target.value })} min="0" />
                     </div>
                   </div>
-
                   <div className="space-y-1.5">
-                    <Label htmlFor="engineCapacity">سعة المحرك (سي سي)</Label>
+                    <Label htmlFor="engineCapacity" className="text-sm font-semibold">سعة المحرك (سي سي)</Label>
                     <div className="relative">
                       <Cog className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="engineCapacity"
-                        type="number"
-                        className="pr-9"
-                        value={form.engineCapacity}
-                        onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })}
-                        min="0"
-                      />
+                      <Input id="engineCapacity" type="number" className="pr-9 h-10" value={form.engineCapacity}
+                        onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })} min="0" />
                     </div>
                   </div>
                 </div>
-
                 <div className="space-y-1.5">
-                  <Label>الأوراق الرسمية <span className="text-red-500">*</span></Label>
-                  <div className="flex gap-2">
-                    {[
-                      { value: true, label: "مع أوراق رسمية" },
-                      { value: false, label: "بدون أوراق رسمية" },
-                    ].map((d) => (
-                      <button
-                        type="button"
-                        key={String(d.value)}
+                  <Label className="text-sm font-semibold">الأوراق الرسمية</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[{ value: true, label: "مع أوراق رسمية" }, { value: false, label: "بدون أوراق" }].map((d) => (
+                      <button type="button" key={String(d.value)}
                         onClick={() => setForm({ ...form, hasDocuments: d.value })}
-                        className={cn(
-                          "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
-                          form.hasDocuments === d.value
-                            ? "border-primary bg-primary text-white"
-                            : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
-                        )}
-                      >
-                        <FileText className="w-4 h-4" />
-                        {d.label}
+                        className={cn("py-2 rounded-xl border-2 text-xs font-bold transition-all flex items-center justify-center gap-1",
+                          form.hasDocuments === d.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                        )}>
+                        <FileText className="w-3.5 h-3.5" /> {d.label}
                       </button>
                     ))}
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
-            <div className="space-y-1.5">
-              <Label>هل يتوفر توصيل؟</Label>
-              <div className="flex gap-2">
-                {[
-                  { value: true, label: "متوفر" },
-                  { value: false, label: "غير متوفر" },
-                ].map((d) => (
-                  <button
-                    type="button"
-                    key={String(d.value)}
+            {/* Images */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-bold">الصور <span className="text-red-500">*</span></Label>
+                <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full",
+                  images.length < MIN_IMAGES ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                )}>
+                  {images.length}/{MAX_IMAGES}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                {images.map((img, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-200 group">
+                    <img src={img} alt={`صورة ${i + 1}`} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => removeImage(i)}
+                      className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {images.length < MAX_IMAGES && (
+                  <label className={cn(
+                    "aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors text-gray-400 gap-1",
+                    isUploading ? "border-primary/50 opacity-60 pointer-events-none" : "border-gray-300 hover:border-primary hover:text-primary"
+                  )}>
+                    {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <Plus className="w-6 h-6" />}
+                    {!isUploading && <span className="text-[10px] font-semibold">أضف صورة</span>}
+                    <input type="file" accept="image/*" multiple className="hidden"
+                      onChange={(e) => handleFilesSelected(e.target.files)} disabled={isUploading} />
+                  </label>
+                )}
+              </div>
+              <p className={cn("text-xs font-medium", images.length < MIN_IMAGES ? "text-amber-600" : "text-green-600")}>
+                {images.length < MIN_IMAGES
+                  ? `يرجى إضافة ${MIN_IMAGES - images.length} صور ${images.length > 0 ? "على الأقل" : ""} (الحد الأدنى ${MIN_IMAGES} صور)`
+                  : `✓ تم إضافة الصور`}
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleNext}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+              disabled={!canProceedStep2 || isUploading}
+            >
+              {isUploading ? <><Loader2 className="w-4 h-4 animate-spin ml-2" />جاري رفع الصور...</> : "التالي"}
+            </Button>
+          </div>
+        )}
+
+        {/* Step 3: Location & Price */}
+        {step === 3 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6">
+
+            {/* Province */}
+            <div className="space-y-2">
+              <Label className="text-base font-bold">المحافظة <span className="text-red-500">*</span></Label>
+              <div className="relative">
+                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })}>
+                  <SelectTrigger className="pr-9 h-11">
+                    <SelectValue placeholder="اختر المحافظة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {IRAQ_PROVINCES.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Delivery */}
+            <div className="space-y-2">
+              <Label className="text-base font-bold">هل يتوفر توصيل؟</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[{ value: true, label: "نعم ✓" }, { value: false, label: "لا ✗" }].map((d) => (
+                  <button type="button" key={String(d.value)}
                     onClick={() => setForm({ ...form, hasDelivery: d.value })}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
-                      form.hasDelivery === d.value
-                        ? "border-primary bg-primary text-white"
-                        : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
-                    )}
-                  >
-                    <Truck className="w-4 h-4" />
-                    {d.label}
+                    className={cn("py-3 rounded-xl border-2 text-sm font-bold transition-all flex items-center justify-center gap-1.5",
+                      form.hasDelivery === d.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                    )}>
+                    <Truck className="w-4 h-4" /> {d.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="description">مواصفات الدراجة</Label>
-              <div className="relative">
-                <FileText className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Textarea
-                  id="description"
-                  className="pr-9 min-h-[100px]"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
+            {/* Price */}
+            <div className="space-y-3">
+              <Label className="text-base font-bold">السعر <span className="text-red-500">*</span></Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button type="button"
+                  onClick={() => setForm({ ...form, priceOnRequest: false })}
+                  className={cn("py-3 rounded-xl border-2 text-sm font-bold transition-all",
+                    !form.priceOnRequest ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                  )}>
+                  💰 سعر محدد
+                </button>
+                <button type="button"
+                  onClick={() => setForm({ ...form, priceOnRequest: true, price: "" })}
+                  className={cn("py-3 rounded-xl border-2 text-sm font-bold transition-all",
+                    form.priceOnRequest ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                  )}>
+                  📞 يرجى طلب السعر
+                </button>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <Label>الصور <span className="text-red-500">*</span></Label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {images.map((img, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
-                    <img src={img} alt={`صورة ${i + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="absolute top-1 left-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-
-                <label
-                  className={cn(
-                    "aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-primary hover:text-primary text-gray-400 transition-colors",
-                    isUploading && "opacity-60 pointer-events-none"
-                  )}
-                >
-                  {isUploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <Plus className="w-7 h-7" />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleFilesSelected(e.target.files)}
+              {!form.priceOnRequest && (
+                <div className="relative">
+                  <Coins className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    className="pr-9 h-11 text-lg font-bold"
+                    placeholder="السعر بالدينار العراقي"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    min="0"
                   />
-                </label>
-              </div>
-              <p className={cn("text-xs", images.length < MIN_IMAGES ? "text-amber-600" : "text-muted-foreground")}>
-                يرجى إضافة صورتين أو أكثر
-              </p>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">د.ع</span>
+                </div>
+              )}
+              {form.priceOnRequest && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 border border-blue-200 px-3 py-2.5 rounded-xl">
+                  <Coins className="w-4 h-4 text-primary flex-shrink-0" />
+                  سيظهر "يرجى طلب السعر" على إعلانك
+                </div>
+              )}
             </div>
-          </div>
 
-          <div className="bg-card rounded-xl border border-border p-6 space-y-5">
-            <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <Phone className="w-5 h-5 text-primary" /> معلومات التواصل
-            </h2>
-            <div className="space-y-1.5">
-              <Label htmlFor="phone">رقم التليفون <span className="text-red-500">*</span></Label>
-              <div className="relative">
-                <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  type="tel"
-                  className="pr-9 text-lg font-medium"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  required
-                  dir="ltr"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">سيتواصل المشترون معك على هذا الرقم</p>
+            <Button
+              type="button"
+              onClick={handleNext}
+              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90"
+              disabled={!canProceedStep3}
+            >
+              التالي
+            </Button>
+          </div>
+        )}
+
+        {/* Step 4: Description + Submit */}
+        {step === 4 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-base font-bold">وصف الدراجة</Label>
+              <Textarea
+                id="description"
+                className="min-h-[180px] text-sm leading-relaxed"
+                placeholder="اكتب وصفاً تفصيلياً للدراجة: الحالة، المواصفات، سبب البيع..."
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">الوصف التفصيلي يزيد فرص البيع. يمكنك تركه فارغاً.</p>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            disabled={isPending || isUploading}
-            className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 shadow-md"
-          >
-            {isPending
-              ? isEdit
-                ? "جاري الحفظ..."
-                : "جاري النشر..."
-              : isEdit
-                ? "حفظ التغييرات"
-                : "انشر الإعلان مجاناً"}
-          </Button>
-        </form>
+            {/* Summary */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-200">
+              <p className="text-sm font-bold text-gray-700 mb-3">ملخص الإعلان</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+                <span className="text-muted-foreground">الهاتف:</span>
+                <span className="font-semibold" dir="ltr">{form.phone}</span>
+                <span className="text-muted-foreground">الاسم:</span>
+                <span className="font-semibold truncate">{form.title}</span>
+                <span className="text-muted-foreground">النوع:</span>
+                <span className="font-semibold">{mainTypes.find(t => t.value === mainType)?.label ?? mainType}</span>
+                <span className="text-muted-foreground">الحالة:</span>
+                <span className="font-semibold">{form.condition === "new" ? "جديدة" : "مستعملة"}</span>
+                <span className="text-muted-foreground">المحافظة:</span>
+                <span className="font-semibold">{form.province}</span>
+                <span className="text-muted-foreground">السعر:</span>
+                <span className="font-semibold text-primary">
+                  {form.priceOnRequest ? "يرجى طلب السعر" : `${Number(form.price).toLocaleString()} د.ع`}
+                </span>
+                <span className="text-muted-foreground">الصور:</span>
+                <span className="font-semibold">{images.length} صور</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isPending || isUploading}
+              className="w-full h-14 text-base font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30"
+            >
+              {isPending
+                ? <><Loader2 className="w-4 h-4 animate-spin ml-2" />{isEdit ? "جاري الحفظ..." : "جاري النشر..."}</>
+                : isEdit ? "حفظ التغييرات"
+                : <><Bike className="w-5 h-5 ml-2" />نشر الإعلان</>
+              }
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

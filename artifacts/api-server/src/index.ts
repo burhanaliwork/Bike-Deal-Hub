@@ -19,7 +19,7 @@ const staticDir = path.resolve(
 app.use(express.static(staticDir, { maxAge: "1d" }));
 
 // SPA fallback — must be last, after all API routes
-app.get("*", (req, res, next) => {
+app.use((req: any, res: any, next: any) => {
   if (req.path.startsWith("/api")) return next();
   res.sendFile(path.join(staticDir, "index.html"));
 });

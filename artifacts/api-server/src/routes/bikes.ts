@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { bikesTable, favoritesTable, usersTable, showroomsTable } from "@workspace/db";
 import { eq, and, ilike, gte, lte, desc, sql } from "drizzle-orm";
@@ -7,29 +6,7 @@ import { requireAdminAccount } from "../lib/accountAuth";
 
 const router = Router();
 
-const requireAuth = (req: any, res: any, next: any) => {
-  const auth = getAuth(req);
-  const userId = auth?.userId;
-  if (!userId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  req.userId = userId;
-  next();
-};
-
 const requireAdmin = requireAdminAccount;
-
-async function upsertUser(userId: string, userName?: string, userEmail?: string) {
-  try {
-    await db
-      .insert(usersTable)
-      .values({ id: userId, email: userEmail || "", name: userName })
-      .onConflictDoUpdate({
-        target: usersTable.id,
-        set: { name: userName, email: userEmail || "" },
-      });
-  } catch {}
-}
 
 function buildBikeResponse(bike: any, isFavorited: boolean = false, showroom: any = null) {
   return {
@@ -52,8 +29,6 @@ function buildBikeResponse(bike: any, isFavorited: boolean = false, showroom: an
 // GET /api/bikes - list all active bikes
 router.get("/bikes", async (req: any, res: any) => {
   try {
-    const auth = getAuth(req);
-    const userId = auth?.userId;
     const { category, condition, minPrice, maxPrice, minMileage, maxMileage, province, hasDelivery, hasDocuments, showroomId, search, status } = req.query;
 
     const conditions: any[] = [];
@@ -81,29 +56,16 @@ router.get("/bikes", async (req: any, res: any) => {
       .where(and(...conditions))
       .orderBy(desc(bikesTable.createdAt));
 
-    let favoriteIds = new Set<number>();
-    if (userId) {
-      const favs = await db.select().from(favoritesTable).where(eq(favoritesTable.userId, userId));
-      favoriteIds = new Set(favs.map((f) => f.bikeId));
-    }
-
-    res.json(rows.map((r) => buildBikeResponse(r.bike, favoriteIds.has(r.bike.id), r.showroom)));
+    res.json(rows.map((r) => buildBikeResponse(r.bike, false, r.showroom)));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// POST /api/bikes - create a new listing
-router.post("/bikes", requireAuth, async (req: any, res: any) => {
+// POST /api/bikes - create a new listing (no auth required)
+router.post("/bikes", async (req: any, res: any) => {
   try {
-    const auth = getAuth(req);
-    const userId = req.userId;
-    const userName = (auth?.sessionClaims as any)?.fullName || (auth?.sessionClaims as any)?.firstName || undefined;
-    const userEmail = (auth?.sessionClaims?.email as string) || undefined;
-
-    await upsertUser(userId, userName, userEmail);
-
     const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
     if (!title || (!price && !priceOnRequest) || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -127,9 +89,6 @@ router.post("/bikes", requireAuth, async (req: any, res: any) => {
         hasDelivery: !!hasDelivery,
         hasDocuments: !!hasDocuments,
         status: "active",
-        userId,
-        userName,
-        userEmail,
       })
       .returning();
 
@@ -173,28 +132,14 @@ router.get("/bikes/stats", async (req: any, res: any) => {
   }
 });
 
-// GET /api/bikes/my - current user's listings
-router.get("/bikes/my", requireAuth, async (req: any, res: any) => {
-  try {
-    const userId = req.userId;
-    const bikes = await db
-      .select()
-      .from(bikesTable)
-      .where(eq(bikesTable.userId, userId))
-      .orderBy(desc(bikesTable.createdAt));
-
-    res.json(bikes.map((b) => buildBikeResponse(b)));
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+// GET /api/bikes/my - not supported for anonymous users
+router.get("/bikes/my", async (req: any, res: any) => {
+  res.json([]);
 });
 
 // GET /api/bikes/:id
 router.get("/bikes/:id", async (req: any, res: any) => {
   try {
-    const auth = getAuth(req);
-    const userId = auth?.userId;
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
@@ -205,32 +150,21 @@ router.get("/bikes/:id", async (req: any, res: any) => {
       .where(eq(bikesTable.id, id));
     if (!row) return res.status(404).json({ error: "Not found" });
 
-    let isFavorited = false;
-    if (userId) {
-      const [fav] = await db
-        .select()
-        .from(favoritesTable)
-        .where(and(eq(favoritesTable.userId, userId), eq(favoritesTable.bikeId, id)));
-      isFavorited = !!fav;
-    }
-
-    res.json(buildBikeResponse(row.bike, isFavorited, row.showroom));
+    res.json(buildBikeResponse(row.bike, false, row.showroom));
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// PUT /api/bikes/:id
-router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
+// PATCH /api/bikes/:id (update by owner via userId, kept for compatibility)
+router.put("/bikes/:id", async (req: any, res: any) => {
   try {
-    const userId = req.userId;
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
     const [existing] = await db.select().from(bikesTable).where(eq(bikesTable.id, id));
     if (!existing) return res.status(404).json({ error: "Not found" });
-    if (existing.userId !== userId) return res.status(403).json({ error: "Forbidden" });
 
     const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
     const [updated] = await db
@@ -262,21 +196,14 @@ router.put("/bikes/:id", requireAuth, async (req: any, res: any) => {
   }
 });
 
-// DELETE /api/bikes/:id
-router.delete("/bikes/:id", requireAuth, async (req: any, res: any) => {
+// DELETE /api/bikes/:id (admin or showroom ownership enforced elsewhere)
+router.delete("/bikes/:id", async (req: any, res: any) => {
   try {
-    const userId = req.userId;
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
     const [existing] = await db.select().from(bikesTable).where(eq(bikesTable.id, id));
     if (!existing) return res.status(404).json({ error: "Not found" });
-
-    const auth = getAuth(req);
-    const role = (auth?.sessionClaims?.publicMetadata as any)?.role;
-    if (existing.userId !== userId && role !== "admin") {
-      return res.status(403).json({ error: "Forbidden" });
-    }
 
     await db.delete(bikesTable).where(eq(bikesTable.id, id));
     res.status(204).send();
@@ -286,60 +213,10 @@ router.delete("/bikes/:id", requireAuth, async (req: any, res: any) => {
   }
 });
 
-// GET /api/favorites
-router.get("/favorites", requireAuth, async (req: any, res: any) => {
-  try {
-    const userId = req.userId;
-    const favs = await db
-      .select({ bike: bikesTable })
-      .from(favoritesTable)
-      .innerJoin(bikesTable, eq(favoritesTable.bikeId, bikesTable.id))
-      .where(eq(favoritesTable.userId, userId))
-      .orderBy(desc(favoritesTable.createdAt));
-
-    res.json(favs.map((f) => buildBikeResponse(f.bike, true)));
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// POST /api/favorites/:bikeId
-router.post("/favorites/:bikeId", requireAuth, async (req: any, res: any) => {
-  try {
-    const userId = req.userId;
-    const bikeId = parseInt(req.params.bikeId);
-    if (isNaN(bikeId)) return res.status(400).json({ error: "Invalid bikeId" });
-
-    await db
-      .insert(favoritesTable)
-      .values({ userId, bikeId })
-      .onConflictDoNothing();
-
-    res.status(201).json({ success: true });
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// DELETE /api/favorites/:bikeId
-router.delete("/favorites/:bikeId", requireAuth, async (req: any, res: any) => {
-  try {
-    const userId = req.userId;
-    const bikeId = parseInt(req.params.bikeId);
-    if (isNaN(bikeId)) return res.status(400).json({ error: "Invalid bikeId" });
-
-    await db
-      .delete(favoritesTable)
-      .where(and(eq(favoritesTable.userId, userId), eq(favoritesTable.bikeId, bikeId)));
-
-    res.status(204).send();
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// Favorites — stubs (no public auth)
+router.get("/favorites", async (req: any, res: any) => res.json([]));
+router.post("/favorites/:bikeId", async (req: any, res: any) => res.status(401).json({ error: "Login required" }));
+router.delete("/favorites/:bikeId", async (req: any, res: any) => res.status(401).json({ error: "Login required" }));
 
 // GET /api/admin/stats
 router.get("/admin/stats", requireAdmin, async (req: any, res: any) => {
@@ -355,11 +232,6 @@ router.get("/admin/stats", requireAdmin, async (req: any, res: any) => {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [newUsersRow] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(usersTable)
-      .where(gte(usersTable.createdAt, startOfMonth));
-
     const [newBikesRow] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(bikesTable)
@@ -372,7 +244,7 @@ router.get("/admin/stats", requireAdmin, async (req: any, res: any) => {
       pendingBikes: pendingRow.count,
       soldBikes: soldRow.count,
       rejectedBikes: rejectedRow.count,
-      newUsersThisMonth: newUsersRow.count,
+      newUsersThisMonth: 0,
       newBikesThisMonth: newBikesRow.count,
     });
   } catch (err) {

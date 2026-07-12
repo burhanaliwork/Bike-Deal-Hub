@@ -6,7 +6,6 @@ import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Show } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -198,17 +197,15 @@ export default function BikeDetailPage() {
                 )}
 
                 <div className="absolute top-4 left-4 flex gap-2">
-                  <Show when="signed-in">
-                    <button
-                      onClick={handleFavoriteToggle}
-                      className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all",
-                        bike.isFavorited ? "bg-red-500 text-white" : "bg-white text-gray-600 hover:bg-red-50"
-                      )}
-                    >
-                      <Heart className={cn("w-5 h-5", bike.isFavorited && "fill-current")} />
-                    </button>
-                  </Show>
+                  <button
+                    onClick={handleFavoriteToggle}
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all",
+                      bike.isFavorited ? "bg-red-500 text-white" : "bg-white text-gray-600 hover:bg-red-50"
+                    )}
+                  >
+                    <Heart className={cn("w-5 h-5", bike.isFavorited && "fill-current")} />
+                  </button>
                   <button
                     onClick={handleShare}
                     className="w-10 h-10 rounded-full bg-white text-gray-600 flex items-center justify-center shadow-md hover:bg-gray-50"

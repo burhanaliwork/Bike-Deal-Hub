@@ -39,7 +39,7 @@ export const bikesTable = pgTable("bikes", {
   hasDocuments: boolean("has_documents").notNull().default(false),
   status: text("status").notNull().default("active"),
   showroomId: integer("showroom_id").references(() => showroomsTable.id, { onDelete: "set null" }),
-  userId: text("user_id").notNull(),
+  userId: text("user_id"),
   userName: text("user_name"),
   userEmail: text("user_email"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

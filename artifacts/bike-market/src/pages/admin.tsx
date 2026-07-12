@@ -6,7 +6,7 @@ import {
   getAdminListBikesQueryKey, getAdminListShowroomsQueryKey,
   getGetAdminStatsQueryKey
 } from "@workspace/api-client-react";
-import { useUpload } from "@workspace/object-storage-web";
+import { useImageKitUpload } from "@/hooks/use-imagekit-upload";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -224,7 +224,7 @@ function AdminShowrooms() {
   const { data: showrooms, isLoading } = useAdminListShowrooms();
   const createShowroom = useAdminCreateShowroom();
   const deleteShowroom = useAdminDeleteShowroom();
-  const { uploadFile, isUploading } = useUpload({ basePath: "/api/storage" });
+  const { uploadSingle, isUploading } = useImageKitUpload();
   const qc = useQueryClient();
   const { toast } = useToast();
 
@@ -245,9 +245,9 @@ function AdminShowrooms() {
   const handleImageSelected = async (fileList: FileList | null) => {
     const file = fileList?.[0];
     if (!file) return;
-    const result = await uploadFile(file);
-    if (result?.objectPath) {
-      setForm((f) => ({ ...f, imageUrl: `/api/storage${result.objectPath}` }));
+    const url = await uploadSingle(file, "/motorsby/showrooms");
+    if (url) {
+      setForm((f) => ({ ...f, imageUrl: url }));
     }
   };
 

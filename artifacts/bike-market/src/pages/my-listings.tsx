@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link, Redirect } from "wouter";
-import { Show, useUser } from "@clerk/react";
+import { Link } from "wouter";
 import { useGetMyBikes, useDeleteBike, useUpdateBike, getGetMyBikesQueryKey, getListBikesQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -41,10 +40,6 @@ export default function MyListingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <Show when="signed-out">
-        <Redirect to="/sign-in" />
-      </Show>
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
