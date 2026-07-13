@@ -89,6 +89,7 @@ router.post("/bikes", async (req: any, res: any) => {
         hasDelivery: !!hasDelivery,
         hasDocuments: !!hasDocuments,
         status: "active",
+        userId: `anon:${phone}`,
       })
       .returning();
 
