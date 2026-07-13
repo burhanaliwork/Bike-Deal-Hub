@@ -94,9 +94,9 @@ router.post("/bikes", async (req: any, res: any) => {
       .returning();
 
     res.status(201).json(buildBikeResponse(bike));
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (err: any) {
+    req.log.error({ err, detail: err?.message }, "Failed to create bike listing");
+    res.status(500).json({ error: "Internal server error", detail: err?.message ?? String(err) });
   }
 });
 
