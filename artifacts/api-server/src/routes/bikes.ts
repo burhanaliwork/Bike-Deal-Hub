@@ -310,4 +310,46 @@ router.get("/admin/users", requireAdmin, async (req: any, res: any) => {
   }
 });
 
+// TEMP: diagnostic endpoint — remove after debugging
+router.get("/debug/schema", async (req: any, res: any) => {
+  try {
+    const { db: rawDb } = await import("@workspace/db");
+    const cols = await (rawDb as any).execute(
+      `SELECT column_name, data_type, is_nullable, column_default
+       FROM information_schema.columns
+       WHERE table_name = 'bikes'
+       ORDER BY ordinal_position`
+    );
+    res.json(cols.rows ?? cols);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post("/debug/test-insert", async (req: any, res: any) => {
+  try {
+    const [bike] = await db
+      .insert(bikesTable)
+      .values({
+        title: "__debug__",
+        category: "motorcycle",
+        condition: "new",
+        phone: "07800000000",
+        province: "بغداد",
+        priceOnRequest: false,
+        price: "1000000",
+        hasDelivery: false,
+        hasDocuments: false,
+        status: "active",
+        userId: "debug-user",
+      })
+      .returning();
+    // delete it immediately
+    await db.delete(bikesTable).where(eq(bikesTable.id, bike.id));
+    res.json({ success: true, columns: Object.keys(bike) });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message, code: (err as any).code, detail: (err as any).detail });
+  }
+});
+
 export default router;

@@ -200,14 +200,14 @@ export default function SellPage() {
     if (isShowroom) {
       showroomCreateBike.mutate({ data }, {
         onSuccess: () => { invalidateAll(); toast({ title: "تم نشر الإعلان بنجاح!" }); navigate("/showroom"); },
-        onError: () => toast({ title: "فشل نشر الإعلان.", variant: "destructive" }),
+        onError: (err: any) => toast({ title: "فشل نشر الإعلان.", description: err?.data?.detail ?? err?.message, variant: "destructive" }),
       });
       return;
     }
 
     createBike.mutate({ data }, {
       onSuccess: () => { invalidateAll(); toast({ title: "تم نشر الإعلان بنجاح!" }); navigate("/my-listings"); },
-      onError: () => toast({ title: "فشل نشر الإعلان.", variant: "destructive" }),
+      onError: (err: any) => toast({ title: "فشل نشر الإعلان.", description: err?.data?.detail ?? err?.message, variant: "destructive" }),
     });
   };
 
