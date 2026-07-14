@@ -71,6 +71,7 @@ router.post("/bikes", async (req: any, res: any) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const now = new Date();
     const [bike] = await db
       .insert(bikesTable)
       .values({
@@ -82,20 +83,22 @@ router.post("/bikes", async (req: any, res: any) => {
         condition,
         brand,
         phone,
-        images,
-        mileage: mileage !== undefined && mileage !== null ? parseInt(mileage) : undefined,
-        engineCapacity: engineCapacity !== undefined && engineCapacity !== null ? parseInt(engineCapacity) : undefined,
+        images: images ?? [],
+        mileage: mileage !== undefined && mileage !== null ? parseInt(mileage) : null,
+        engineCapacity: engineCapacity !== undefined && engineCapacity !== null ? parseInt(engineCapacity) : null,
         province,
         hasDelivery: !!hasDelivery,
         hasDocuments: !!hasDocuments,
         status: "active",
         userId: `anon:${phone}`,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 
     res.status(201).json(buildBikeResponse(bike));
   } catch (err: any) {
-    req.log.error({ err, detail: err?.message }, "Failed to create bike listing");
+    console.error("BIKE_CREATE_ERROR:", err?.message, err?.code, err?.detail, err?.stack);
     res.status(500).json({ error: "Internal server error", detail: err?.message ?? String(err) });
   }
 });
@@ -307,6 +310,43 @@ router.get("/admin/users", requireAdmin, async (req: any, res: any) => {
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// TEMP: diagnostic GET endpoint — open in browser to see actual DB error
+router.get("/debug/test-insert", async (req: any, res: any) => {
+  try {
+    const now = new Date();
+    const [bike] = await db
+      .insert(bikesTable)
+      .values({
+        title: "__debug_test__",
+        category: "motorcycle",
+        condition: "new",
+        phone: "07800000000",
+        province: "بغداد",
+        priceOnRequest: false,
+        price: "1000000",
+        hasDelivery: false,
+        hasDocuments: false,
+        status: "active",
+        userId: "debug-user",
+        images: [],
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    await db.delete(bikesTable).where(eq(bikesTable.id, bike.id));
+    res.json({ success: true, message: "INSERT works correctly ✓" });
+  } catch (err: any) {
+    console.error("DEBUG_INSERT_ERROR:", err?.message);
+    res.status(500).json({
+      success: false,
+      error: err?.message,
+      code: err?.code,
+      detail: err?.detail,
+      hint: err?.hint,
+    });
   }
 });
 
