@@ -66,7 +66,23 @@ router.get("/bikes", async (req: any, res: any) => {
 // POST /api/bikes - create a new listing (no auth required)
 router.post("/bikes", async (req: any, res: any) => {
   try {
-    const { title, description, price, priceOnRequest, category, condition, brand, phone, images, mileage, engineCapacity, province, hasDelivery, hasDocuments } = req.body;
+    const {
+      title,
+      description,
+      price,
+      priceOnRequest,
+      category,
+      condition,
+      brand,
+      phone,
+      images,
+      mileage,
+      engineCapacity,
+      province,
+      hasDelivery,
+      hasDocuments,
+    } = req.body;
+
     if (!title || (!price && !priceOnRequest) || !category || !condition || !phone || !province) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -75,24 +91,27 @@ router.post("/bikes", async (req: any, res: any) => {
     const [bike] = await db
       .insert(bikesTable)
       .values({
-        title,
-        description,
-        price: priceOnRequest ? null : price?.toString(),
-        priceOnRequest: !!priceOnRequest,
-        category,
-        condition,
-        brand,
-        phone,
-        images: images ?? [],
-        mileage: mileage !== undefined && mileage !== null ? parseInt(mileage) : null,
-        engineCapacity: engineCapacity !== undefined && engineCapacity !== null ? parseInt(engineCapacity) : null,
-        province,
-        hasDelivery: !!hasDelivery,
-        hasDocuments: !!hasDocuments,
-        status: "active",
-        userId: `anon:${phone}`,
-        createdAt: now,
-        updatedAt: now,
+        title:          String(title),
+        description:    description ? String(description) : null,
+        price:          priceOnRequest ? null : String(price),
+        priceOnRequest: Boolean(priceOnRequest),
+        category:       String(category),
+        condition:      String(condition),
+        brand:          brand ? String(brand) : null,
+        phone:          String(phone),
+        images:         Array.isArray(images) ? images : [],
+        mileage:        mileage != null ? parseInt(String(mileage), 10) : null,
+        engineCapacity: engineCapacity != null ? parseInt(String(engineCapacity), 10) : null,
+        province:       String(province),
+        hasDelivery:    Boolean(hasDelivery),
+        hasDocuments:   Boolean(hasDocuments),
+        status:         "active",
+        showroomId:     null,
+        userId:         `anon:${phone}`,
+        userName:       null,
+        userEmail:      null,
+        createdAt:      now,
+        updatedAt:      now,
       })
       .returning();
 
