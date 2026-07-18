@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useParams, useLocation, Link } from "wouter";
-import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight, BadgeCheck, MapPin, Store } from "lucide-react";
+import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight, BadgeCheck, MapPin, Store, X } from "lucide-react";
 import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { StatusBadge } from "@/components/bike-card";
@@ -32,6 +32,7 @@ export default function BikeDetailPage() {
 
   const CategoryIcon = bike ? (categoryIcons[bike.category] || Bike) : Bike;
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
 
@@ -99,6 +100,7 @@ export default function BikeDetailPage() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -133,10 +135,11 @@ export default function BikeDetailPage() {
             {/* Images */}
             <div>
               <div
-                className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3] touch-pan-y select-none"
+                className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3] touch-pan-y select-none cursor-zoom-in"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onClick={() => bike?.images?.length && setLightboxOpen(true)}
               >
                 <div
                   dir="ltr"
@@ -348,5 +351,85 @@ export default function BikeDetailPage() {
         )}
       </div>
     </div>
+
+    {/* Fullscreen Lightbox */}
+
+    {lightboxOpen && bike?.images && (
+      <div
+        className="fixed inset-0 z-[100] bg-black flex flex-col"
+        onClick={() => setLightboxOpen(false)}
+      >
+        {/* Close button */}
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Counter */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white/70 text-sm font-medium">
+          {activeImage + 1} / {bike.images.length}
+        </div>
+
+        {/* Main image */}
+        <div
+          className="flex-1 flex items-center justify-center p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            dir="ltr"
+            className="w-full h-full flex transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${activeImage * 100}%)` }}
+          >
+            {bike.images.map((img: string, i: number) => (
+              <div key={i} className="w-full h-full flex-shrink-0 flex items-center justify-center">
+                <img
+                  src={img}
+                  alt={`${bike.title} ${i + 1}`}
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        {bike.images.length > 1 && (
+          <div
+            className="flex items-center justify-center gap-6 py-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={goToPrev}
+              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            <div className="flex gap-2">
+              {bike.images.map((_: string, i: number) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImage(i)}
+                  className={`rounded-full transition-all ${activeImage === i ? "bg-white w-6 h-2" : "bg-white/40 w-2 h-2"}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={goToNext}
+              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          </div>
+        )}
+      </div>
+    )}
+    </>
   );
 }

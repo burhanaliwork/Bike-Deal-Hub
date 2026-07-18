@@ -98,12 +98,6 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
           }
         </div>
 
-        {/* Details link */}
-        <div className="mt-0.5">
-          <span className="text-xs bg-gray-100 text-gray-900 px-2.5 py-1 rounded-md font-semibold inline-block">
-            عرض التفاصيل
-          </span>
-        </div>
       </div>
 
       {/* Image side (left in RTL = left visually) */}
