@@ -1,6 +1,6 @@
-# motorby — سوق الدراجات
+# Motorsby — سوق الدراجات
 
-A full-stack Arabic bike marketplace for Iraq, branded as "motorby", inspired by iqcars.net layout with a distinct navy-blue identity. Users buy and sell bikes with direct phone/WhatsApp contact. Prices are in Iraqi Dinar (د.ع / IQD), no login/sign-up required to post or browse. Verified showrooms (صالات عرض) have credentialed accounts managed by the site admin.
+A full-stack Arabic bike marketplace for Iraq, branded as "Motorsby", inspired by iqcars.net layout with a distinct neon-green (#CCFF00) + black identity. Users buy and sell bikes with direct phone/WhatsApp contact. Prices are in Iraqi Dinar (د.ع / IQD), no login/sign-up required to post or browse. Verified showrooms (صالات عرض) have credentialed accounts managed by the site admin.
 
 ## Architecture
 
@@ -79,8 +79,8 @@ Both workflows run automatically:
 
 ## Design
 
-- **Brand**: motorby — wheel SVG logo, "motor" navy + "by" blue, no gap
-- **Theme**: Deep navy (#0D1B35) + vibrant blue (hsl 213 88% 50%) on light gray background
+- **Brand**: Motorsby — full logo PNG (`/logo.png`), M-icon favicon (`/favicon.png`)
+- **Theme**: Neon green (#CCFF00, hsl 72 100% 50%) + black (#111111) on light gray background
 - **Language**: Arabic (RTL), English brand name "motorby"
 - **Market**: Iraq — currency is Iraqi Dinar (د.ع / IQD), phone format 07XXXXXXXXX
 - **Layout**: iqcars.net-inspired — sticky white navbar with "فلتر" + "بيع دراجتك" buttons, list-view cards

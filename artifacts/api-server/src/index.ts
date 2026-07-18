@@ -108,13 +108,13 @@ async function runMigrations() {
     await client.query(`ALTER TABLE bikes ALTER COLUMN condition DROP NOT NULL`).catch(() => {});
     await client.query(`ALTER TABLE bikes ALTER COLUMN phone DROP NOT NULL`).catch(() => {});
 
-    // 4. Seed admin account if it doesn't exist
-    const adminPassword = process.env["ADMIN_PASSWORD"] ?? "MB-z40tDIwU";
+    // 4. Seed admin account — always update password so env/default changes take effect
+    const adminPassword = process.env["ADMIN_PASSWORD"] ?? "admin2025";
     const adminHash = hashPassword(adminPassword);
     await client.query(
       `INSERT INTO accounts (username, password_hash, role)
        VALUES ($1, $2, 'admin')
-       ON CONFLICT (username) DO NOTHING`,
+       ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
       ["admin", adminHash]
     );
 

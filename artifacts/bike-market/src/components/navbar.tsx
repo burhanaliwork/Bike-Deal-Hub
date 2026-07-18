@@ -30,7 +30,7 @@ export default function Navbar() {
 
               {/* Add listing button */}
               <Link href="/sell">
-                <Button size="sm" className="bg-[#0D1B35] hover:bg-[#1a2d55] text-white font-semibold px-4 transition-all duration-300 ease-out">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 transition-all duration-300 ease-out">
                   بيع دراجتك
                 </Button>
               </Link>
@@ -52,7 +52,7 @@ export default function Navbar() {
 
             {/* Right side — logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
-              <img src="/logo.svg" alt="motorby" className="h-9 w-auto" />
+              <img src="/logo.png" alt="Motorsby" className="h-10 w-auto" />
             </Link>
           </div>
         </div>

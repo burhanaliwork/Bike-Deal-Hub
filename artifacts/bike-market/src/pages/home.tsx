@@ -14,16 +14,16 @@ export default function HomePage() {
       <Navbar />
 
       {/* CTA Banner */}
-      <section className="bg-[#0D1B35] overflow-hidden">
+      <section className="bg-[#111111] overflow-hidden">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
           <h2 className="text-white font-black text-xl leading-tight mb-1">
             بيع دراجتك اليوم مجاناً
           </h2>
-          <p className="text-blue-200 text-sm mb-3 leading-relaxed">
+          <p className="text-[#CCFF00]/80 text-sm mb-3 leading-relaxed">
             انشر إعلانك خلال دقيقتين وتواصل مع المشترين مباشرة.
           </p>
           <Link href="/sell">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold px-5 h-9 transition-all duration-300 ease-out">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 h-9 transition-all duration-300 ease-out">
               بيع دراجتك الآن
             </Button>
           </Link>
@@ -37,7 +37,7 @@ export default function HomePage() {
           <span className="text-sm text-gray-400">
             {!isLoading && `${bikes?.length ?? 0} إعلان متوفر`}
           </span>
-          <h1 className="text-base font-bold text-[#0D1B35]">جميع الدراجات</h1>
+          <h1 className="text-base font-bold text-gray-900">جميع الدراجات</h1>
         </div>
 
         {isLoading ? (
@@ -71,12 +71,12 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#060e1e] text-gray-500 py-6 mt-4">
+      <footer className="bg-[#111111] text-gray-500 py-6 mt-4">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-2">
-            <img src="/logo.svg" alt="motorby" className="h-7 w-auto brightness-0 invert opacity-50" />
+            <img src="/favicon.png" alt="Motorsby" className="h-8 w-auto opacity-80" />
           </div>
-          <p className="text-xs">© 2025 motorby — منصة الدراجات الأولى في العراق</p>
+          <p className="text-xs">© 2025 Motorsby — منصة الدراجات الأولى في العراق</p>
         </div>
       </footer>
     </div>

@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { ShowroomSummary } from "@workspace/api-client-react";
 
-const KEY = "motorby_auth";
+const KEY = "motorsby_auth";
 
 export interface StoredAuth {
   token: string;
