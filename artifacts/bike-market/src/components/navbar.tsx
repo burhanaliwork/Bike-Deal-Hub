@@ -52,7 +52,7 @@ export default function Navbar() {
 
             {/* Right side — logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
-              <img src="/logo.png" alt="Motorsby" className="h-14 w-auto" />
+              <img src="/logo.png" alt="Motorsby" className="h-20 w-auto" />
             </Link>
           </div>
         </div>
