@@ -250,8 +250,8 @@ export default function BikeDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">
-                <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">
-                  <CategoryIcon className="w-4 h-4 text-primary" />
+                <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium text-gray-900">
+                  <CategoryIcon className="w-4 h-4 text-gray-900" />
                   {categoryLabels[bike.category] || bike.category}
                 </span>
                 <span className="text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">
@@ -261,8 +261,8 @@ export default function BikeDetailPage() {
                   <span className="text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">{bike.brand}</span>
                 )}
                 {bike.category === "motorcycle" && bike.mileage != null && (
-                  <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">
-                    <Gauge className="w-4 h-4 text-primary" />
+                  <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium text-gray-900">
+                    <Gauge className="w-4 h-4 text-gray-900" />
                     {Number(bike.mileage).toLocaleString()} كم
                   </span>
                 )}
@@ -304,11 +304,11 @@ export default function BikeDetailPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                      <div className="font-bold text-foreground truncate">
                         صالة عرض {bike.showroom.name}
                       </div>
                       {bike.showroom.verified && (
-                        <div className="flex items-center gap-1 text-xs text-primary font-semibold mt-0.5">
+                        <div className="flex items-center gap-1 text-xs text-gray-900 font-semibold mt-0.5">
                           <BadgeCheck className="w-4 h-4" />
                           صالة عرض معتمدة
                         </div>
@@ -320,7 +320,7 @@ export default function BikeDetailPage() {
                       href={bike.showroom.googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-primary border border-primary/30 rounded-lg py-2 hover:bg-primary/5 transition-colors"
+                      className="mt-3 flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 border border-gray-200 rounded-lg py-2 hover:bg-gray-50 transition-colors"
                     >
                       <MapPin className="w-4 h-4" />
                       الموقع على كوكل ماب
@@ -332,9 +332,9 @@ export default function BikeDetailPage() {
               <div className="flex gap-3">
                 <a
                   href={`tel:${bike.phone}`}
-                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-gray-900 font-semibold py-3 px-6 rounded-xl transition-colors"
                 >
-                  <Phone className="w-5 h-5" />
+                  <Phone className="w-5 h-5 text-gray-900" />
                   اتصل بالبائع
                 </a>
                 <a

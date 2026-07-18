@@ -249,16 +249,16 @@ export default function SellPage() {
           </div>
           <div className="text-center">
             <p className="text-xs text-muted-foreground">الخطوة {step} من {TOTAL_STEPS}</p>
-            <h2 className="text-xl font-black text-[#0D1B35] mt-0.5">{stepTitles[step - 1]}</h2>
+            <h2 className="text-xl font-black text-gray-900 mt-0.5">{stepTitles[step - 1]}</h2>
           </div>
         </div>
 
         {/* Step 1: Contact */}
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-              <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-              <p className="text-sm text-blue-800 font-medium">سيتواصل المشترون معك مباشرة على هذا الرقم</p>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <Phone className="w-5 h-5 text-gray-900 flex-shrink-0" />
+              <p className="text-sm text-gray-900 font-medium">سيتواصل المشترون معك مباشرة على هذا الرقم</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-base font-bold">رقم الهاتف <span className="text-red-500">*</span></Label>
@@ -303,13 +303,12 @@ export default function SellPage() {
                       if (t.value !== "motorcycle") setForm((f) => ({ ...f, mileage: "", engineCapacity: "" }));
                     }}
                     className={cn(
-                      "py-3 px-2 rounded-xl border-2 text-sm font-bold transition-all flex flex-col items-center gap-1",
+                      "py-3 px-2 rounded-xl border-2 text-sm font-bold transition-all",
                       mainType === t.value
-                        ? "border-primary bg-primary/5 text-primary"
+                        ? "border-primary bg-primary/5 text-gray-900"
                         : "border-gray-200 text-gray-500 hover:border-primary/40"
                     )}
                   >
-                    <span className="text-xl">{t.emoji}</span>
                     {t.label}
                   </button>
                 ))}
@@ -328,7 +327,7 @@ export default function SellPage() {
                       onClick={() => setBicycleCategory(c.value)}
                       className={cn(
                         "py-2 px-1 rounded-xl border-2 text-xs font-bold transition-all",
-                        bicycleCategory === c.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                        bicycleCategory === c.value ? "border-primary bg-primary/5 text-gray-900" : "border-gray-200 text-gray-500"
                       )}
                     >
                       {c.label}
@@ -369,14 +368,14 @@ export default function SellPage() {
             <div className="space-y-2">
               <Label className="text-base font-bold">حالة الدراجة <span className="text-red-500">*</span></Label>
               <div className="grid grid-cols-2 gap-3">
-                {[{ value: "new", label: "جديدة ✨" }, { value: "used", label: "مستعملة 🔧" }].map((c) => (
+                {[{ value: "new", label: "جديدة" }, { value: "used", label: "مستعملة" }].map((c) => (
                   <button
                     type="button"
                     key={c.value}
                     onClick={() => setForm({ ...form, condition: c.value })}
                     className={cn(
                       "py-3 rounded-xl border-2 text-sm font-bold transition-all",
-                      form.condition === c.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                      form.condition === c.value ? "border-primary bg-primary/5 text-gray-900" : "border-gray-200 text-gray-500"
                     )}
                   >
                     {c.label}
@@ -414,7 +413,7 @@ export default function SellPage() {
                       <button type="button" key={String(d.value)}
                         onClick={() => setForm({ ...form, hasDocuments: d.value })}
                         className={cn("py-2 rounded-xl border-2 text-xs font-bold transition-all flex items-center justify-center gap-1",
-                          form.hasDocuments === d.value ? "border-primary bg-primary/5 text-primary" : "border-gray-200 text-gray-500"
+                          form.hasDocuments === d.value ? "border-primary bg-primary/5 text-gray-900" : "border-gray-200 text-gray-500"
                         )}>
                         <FileText className="w-3.5 h-3.5" /> {d.label}
                       </button>
