@@ -78,7 +78,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
         {/* Specs chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5">
+          <span className="text-xs bg-gray-100 text-gray-900 px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5">
             <CategoryIcon className="w-2.5 h-2.5" />
             {categoryLabels[bike.category] || bike.category}
           </span>
@@ -100,7 +100,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
         {/* Details link */}
         <div className="mt-0.5">
-          <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-md font-semibold inline-block">
+          <span className="text-xs bg-gray-100 text-gray-900 px-2.5 py-1 rounded-md font-semibold inline-block">
             عرض التفاصيل
           </span>
         </div>
