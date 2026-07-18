@@ -150,7 +150,7 @@ export default function ShowroomDashboardPage() {
                     </Link>
                     <StatusBadge status={bike.status} />
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-base font-black text-gray-900">
                     {Number(bike.price).toLocaleString()} د.ع
                   </div>
                 </div>

@@ -239,10 +239,10 @@ export default function BikeDetailPage() {
                 <StatusBadge status={bike.status} />
               </div>
 
-              <div className="text-3xl font-black text-primary mb-4">
+              <div className="text-4xl font-black text-gray-900 mb-4">
                 {bike.priceOnRequest
-                  ? <span className="text-xl font-bold text-muted-foreground">يرجى طلب السعر</span>
-                  : <>{Number(bike.price).toLocaleString()} <span className="text-lg font-bold">د.ع</span></>
+                  ? <span className="text-2xl font-bold text-muted-foreground">يرجى طلب السعر</span>
+                  : <>{Number(bike.price).toLocaleString()} <span className="text-2xl font-bold">د.ع</span></>
                 }
               </div>
 

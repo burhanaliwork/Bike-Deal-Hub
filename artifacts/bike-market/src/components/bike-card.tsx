@@ -91,10 +91,10 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         </div>
 
         {/* Price */}
-        <div className="text-lg font-black text-gray-900 leading-none mt-auto">
+        <div className="text-2xl font-black text-gray-900 leading-none mt-auto">
           {bike.priceOnRequest
             ? <span className="text-sm font-bold text-muted-foreground">يرجى طلب السعر</span>
-            : <>{(bike.price ?? 0).toLocaleString()} <span className="text-sm font-bold">د.ع</span></>
+            : <>{(bike.price ?? 0).toLocaleString()} <span className="text-base font-bold">د.ع</span></>
           }
         </div>
 
