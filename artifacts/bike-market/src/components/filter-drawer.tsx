@@ -144,7 +144,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                   className={cn(
                     "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all text-right",
                     mainType === t.value
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-gray-900"
                       : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
                   )}
                 >
@@ -166,7 +166,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                     className={cn(
                       "py-2.5 px-3 rounded-xl border-2 text-sm font-semibold transition-all",
                       category === c.value
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-gray-900"
                         : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
                     )}
                   >
@@ -192,7 +192,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                   className={cn(
                     "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
                     condition === c.value
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-gray-900"
                       : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
                   )}
                 >
@@ -218,7 +218,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                     className={cn(
                       "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all",
                       documents === d.value
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-gray-900"
                         : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
                     )}
                   >
@@ -288,7 +288,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
                   className={cn(
                     "flex-1 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all flex items-center justify-center gap-1.5",
                     delivery === d.value
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-gray-900"
                       : "border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary"
                   )}
                 >
