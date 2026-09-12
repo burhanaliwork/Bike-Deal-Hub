@@ -64,14 +64,14 @@ export default function HomePage() {
             <Bike className="w-14 h-14 text-gray-200 mx-auto mb-3" />
             <p className="text-gray-400 font-medium">لا توجد إعلانات حالياً</p>
             <Link href="/sell">
-              <Button className="mt-4 bg-primary text-white" size="sm">انشر أول إعلان</Button>
+              <Button className="mt-4 bg-primary text-gray-900" size="sm">انشر أول إعلان</Button>
             </Link>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#111111] text-gray-500 py-6 mt-4">
+      <footer className="bg-[#111111] text-gray-100 py-6 mt-4">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-2">
             <img src="/favicon.png" alt="Motorsby" className="h-8 w-auto opacity-80" />

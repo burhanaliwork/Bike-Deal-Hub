@@ -110,7 +110,7 @@ export default function ShowroomDashboardPage() {
               </Link>
             )}
             <Link href="/sell">
-              <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90 text-white font-semibold">
+              <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90 text-gray-900 font-semibold">
                 <Plus className="w-4 h-4" />
                 إضافة منتج
               </Button>
@@ -186,7 +186,7 @@ export default function ShowroomDashboardPage() {
             <Bike className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-muted-foreground mb-4">لا توجد منتجات بعد</h3>
             <Link href="/sell">
-              <Button className="gap-1.5 bg-primary hover:bg-primary/90 text-white">
+              <Button className="gap-1.5 bg-primary hover:bg-primary/90 text-gray-900">
                 <Plus className="w-4 h-4" />
                 أضف أول منتج
               </Button>

@@ -96,7 +96,7 @@ export default function ShowroomPage() {
                   {showroom.phone && (
                     <a
                       href={`tel:${showroom.phone}`}
-                      className="flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary text-white rounded-lg py-2 px-4 hover:bg-primary/90 transition-colors"
+                      className="flex items-center justify-center gap-1.5 text-sm font-semibold bg-primary text-gray-900 rounded-lg py-2 px-4 hover:bg-primary/90 transition-colors"
                     >
                       <Phone className="w-4 h-4" />
                       اتصل بصالة العرض

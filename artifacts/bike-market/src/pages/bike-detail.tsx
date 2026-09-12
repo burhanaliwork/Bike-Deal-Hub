@@ -341,7 +341,7 @@ export default function BikeDetailPage() {
                   href={`https://wa.me/${bike.phone.replace(/\D/g, "")}?text=مرحباً، أنا مهتم بإعلان دراجتك: ${bike.title}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-gray-900 font-semibold py-3 px-6 rounded-xl transition-colors"
                 >
                   واتساب
                 </a>

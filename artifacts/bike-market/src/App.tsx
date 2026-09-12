@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/queryClient";
@@ -30,20 +30,24 @@ function AuthTokenSetter() {
 }
 
 function Router() {
+  const [location] = useLocation();
+
   return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/listings" component={ListingsPage} />
-      <Route path="/listings/:id" component={BikeDetailPage} />
-      <Route path="/my-listings" component={MyListingsPage} />
-      <Route path="/sell" component={SellPage} />
-      <Route path="/favorites" component={FavoritesPage} />
-      <Route path="/admin" component={AdminPage} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/showroom" component={ShowroomDashboardPage} />
-      <Route path="/showrooms/:id" component={ShowroomPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <div key={location} className="page-transition">
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/listings" component={ListingsPage} />
+        <Route path="/listings/:id" component={BikeDetailPage} />
+        <Route path="/my-listings" component={MyListingsPage} />
+        <Route path="/sell" component={SellPage} />
+        <Route path="/favorites" component={FavoritesPage} />
+        <Route path="/admin" component={AdminPage} />
+        <Route path="/login" component={LoginPage} />
+        <Route path="/showroom" component={ShowroomDashboardPage} />
+        <Route path="/showrooms/:id" component={ShowroomPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
 }
 

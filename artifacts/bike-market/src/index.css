@@ -76,13 +76,13 @@
   --elevate-2: rgba(0,0,0, .08);
 
   --background: 210 20% 98%;
-  --foreground: 220 30% 10%;
+  --foreground: 0 0% 7%;
   --border: 213 20% 88%;
   --card: 0 0% 100%;
-  --card-foreground: 220 30% 10%;
+  --card-foreground: 0 0% 7%;
   --card-border: 213 20% 90%;
   --sidebar: 213 15% 95%;
-  --sidebar-foreground: 220 30% 10%;
+  --sidebar-foreground: 0 0% 7%;
   --sidebar-border: 213 20% 88%;
   --sidebar-primary: 72 100% 50%;
   --sidebar-primary-foreground: 0 0% 8%;
@@ -90,14 +90,14 @@
   --sidebar-accent-foreground: 220 30% 10%;
   --sidebar-ring: 72 100% 50%;
   --popover: 0 0% 100%;
-  --popover-foreground: 220 30% 10%;
+  --popover-foreground: 0 0% 7%;
   --popover-border: 213 20% 88%;
   --primary: 72 100% 50%;
   --primary-foreground: 0 0% 8%;
   --secondary: 213 20% 93%;
-  --secondary-foreground: 220 30% 20%;
+  --secondary-foreground: 0 0% 7%;
   --muted: 213 15% 94%;
-  --muted-foreground: 213 10% 48%;
+  --muted-foreground: 0 0% 7%;
   --accent: 72 100% 50%;
   --accent-foreground: 0 0% 8%;
   --destructive: 0 84% 60%;
@@ -195,9 +195,62 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer utilities {
+  /* Keep standard interface text consistently black on light surfaces. */
+  .text-primary,
+  .text-muted-foreground,
+  .text-gray-400,
+  .text-gray-500,
+  .text-gray-600,
+  .text-gray-700 {
+    color: #111111 !important;
+  }
+
+  .page-transition {
+    animation: page-enter 320ms ease-out both;
+  }
+
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  a,
+  button,
+  [role="button"] {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 400ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    .page-transition {
+      animation: none;
+    }
+
+    a,
+    button,
+    [role="button"] {
+      transition-duration: 0ms;
+    }
+  }
+
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }

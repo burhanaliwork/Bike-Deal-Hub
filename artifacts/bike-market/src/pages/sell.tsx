@@ -235,8 +235,8 @@ export default function SellPage() {
               <div key={s} className="flex items-center flex-1">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all",
-                  s < step ? "bg-primary text-white" :
-                  s === step ? "bg-primary text-white ring-4 ring-primary/20" :
+                  s < step ? "bg-primary text-gray-900" :
+                  s === step ? "bg-primary text-gray-900 ring-4 ring-primary/20" :
                   "bg-gray-200 text-gray-400"
                 )}>
                   {s < step ? <Check className="w-4 h-4" /> : s}

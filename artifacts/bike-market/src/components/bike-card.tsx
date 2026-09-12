@@ -136,8 +136,8 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
           className={cn(
             "absolute top-1.5 left-1.5 w-6 h-6 rounded-full flex items-center justify-center shadow transition-all",
             bike.isFavorited
-              ? "bg-red-500 text-white"
-              : "bg-white/90 text-gray-400 hover:bg-red-500 hover:text-white"
+              ? "bg-red-500 text-gray-900"
+              : "bg-white/90 text-gray-900 hover:bg-red-500 hover:text-gray-900"
           )}
         >
           <Heart className={cn("w-3 h-3", bike.isFavorited && "fill-current")} />
