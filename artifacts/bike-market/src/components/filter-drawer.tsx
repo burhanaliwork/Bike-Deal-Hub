@@ -107,12 +107,12 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm animate-in fade-in duration-300"
+        className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm animate-in fade-in duration-500"
         onClick={onClose}
       />
 
       {/* Drawer panel */}
-      <div className="fixed top-0 left-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-left duration-300">
+      <div className="fixed top-0 left-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-left duration-500">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <button
