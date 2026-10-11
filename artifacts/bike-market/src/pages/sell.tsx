@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ProvincePicker from "@/components/province-picker";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -25,7 +25,6 @@ import {
   MapPin, Truck, Cog, ArrowRight, Check, Bike,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { IRAQ_PROVINCES } from "@/lib/provinces";
 
 type MainType = "electric" | "motorcycle" | "bicycle";
 
@@ -480,19 +479,10 @@ export default function SellPage() {
             {/* Province */}
             <div className="space-y-2">
               <Label className="text-base font-bold">المحافظة <span className="text-red-500">*</span></Label>
-              <div className="relative">
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-                <Select value={form.province} onValueChange={(v) => setForm({ ...form, province: v })}>
-                  <SelectTrigger className="pr-9 h-11">
-                    <SelectValue placeholder="اختر المحافظة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {IRAQ_PROVINCES.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <ProvincePicker
+                value={form.province}
+                onChange={(province) => setForm({ ...form, province })}
+              />
             </div>
 
             {/* Delivery */}

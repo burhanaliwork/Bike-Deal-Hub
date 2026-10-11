@@ -3,9 +3,8 @@ import { useLocation } from "wouter";
 import { X, SlidersHorizontal, Search, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ProvincePicker from "@/components/province-picker";
 import { cn } from "@/lib/utils";
-import { IRAQ_PROVINCES } from "@/lib/provinces";
 
 interface FilterDrawerProps {
   open: boolean;
@@ -259,18 +258,7 @@ export default function FilterDrawer({ open, onClose }: FilterDrawerProps) {
           {/* العنوان */}
           <div>
             <h3 className="font-bold text-[#0D1B35] mb-3 text-sm">العنوان</h3>
-            <Select value={province} onValueChange={setProvince}>
-              <SelectTrigger className="h-10 border-gray-200 text-sm">
-                <SelectValue placeholder="كل المحافظات" />
-              </SelectTrigger>
-              <SelectContent>
-                {IRAQ_PROVINCES.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ProvincePicker value={province} onChange={setProvince} includeAll />
           </div>
 
           {/* التوصيل */}
