@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { createWhatsAppUrl } from "@/lib/whatsapp";
 
 const categoryIcons: Record<string, any> = {
   mountain: Mountain, road: Wind, electric: Zap, motorcycle: Gauge, bmx: Tag, kids: Users, hybrid: Bike, other: HelpCircle,
@@ -37,6 +38,12 @@ export default function BikeDetailPage() {
   const touchDeltaX = useRef(0);
 
   const imageCount = bike?.images?.length ?? 0;
+  const whatsAppUrl = bike
+    ? createWhatsAppUrl(
+        bike.phone,
+        `مرحباً، أنا مهتم بإعلان دراجتك: ${bike.title}`,
+      )
+    : null;
 
   const goToPrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -337,14 +344,17 @@ export default function BikeDetailPage() {
                   <Phone className="w-5 h-5 text-gray-900" />
                   اتصل بالبائع
                 </a>
-                <a
-                  href={`https://wa.me/${bike.phone.replace(/\D/g, "")}?text=مرحباً، أنا مهتم بإعلان دراجتك: ${bike.title}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-gray-900 font-semibold py-3 px-6 rounded-xl transition-colors"
-                >
-                  واتساب
-                </a>
+                {whatsAppUrl && (
+                  <a
+                    href={whatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="link-whatsapp-seller"
+                    className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-gray-900 font-semibold py-3 px-6 rounded-xl transition-colors"
+                  >
+                    واتساب
+                  </a>
+                )}
               </div>
             </div>
           </div>
