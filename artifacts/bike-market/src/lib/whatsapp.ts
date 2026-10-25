@@ -38,6 +38,9 @@ export function createWhatsAppUrl(
   const normalizedNumber = normalizeIraqiWhatsAppNumber(phone ?? "");
   if (normalizedNumber.length < 8 || normalizedNumber.length > 15) return null;
 
-  const query = new URLSearchParams({ text: message });
-  return `https://wa.me/${normalizedNumber}?${query.toString()}`;
+  const query = new URLSearchParams({
+    phone: normalizedNumber,
+    text: message,
+  });
+  return `https://api.whatsapp.com/send?${query.toString()}`;
 }
