@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Heart, Tag, Zap, Mountain, Wind, Bike as BikeIcon, Users, HelpCircle, Gauge } from "lucide-react";
+import { Heart, Bike as BikeIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAddFavorite, useRemoveFavorite } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,28 +28,13 @@ interface Bike {
   createdAt: string;
 }
 
-const categoryIcons: Record<string, any> = {
-  mountain: Mountain, road: Wind, electric: Zap, motorcycle: Gauge, bmx: Tag, kids: Users, hybrid: BikeIcon, other: HelpCircle,
-};
-const categoryLabels: Record<string, string> = {
-  mountain: "جبلية", road: "طريق", electric: "كهربائية", motorcycle: "نارية", bmx: "بي إم إكس",
-  kids: "أطفال", hybrid: "هجين", other: "أخرى",
-};
-const conditionLabels: Record<string, string> = {
-  new: "جديدة", used: "مستخدمة", like_new: "شبه جديدة", good: "جيدة", fair: "مقبولة",
-};
-
 export default function BikeCard({ bike, showStatus = false }: { bike: Bike; showStatus?: boolean }) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const addFav = useAddFavorite();
   const removeFav = useRemoveFavorite();
-  const CategoryIcon = categoryIcons[bike.category] || BikeIcon;
   const [, navigate] = useLocation();
-  const isBicycleCategory = !["electric", "motorcycle"].includes(bike.category);
-  const displayTitle = isBicycleCategory && bike.title.startsWith("دراجة هوائية")
-    ? "دراجة هوائية"
-    : bike.title;
+  const displayTitle = bike.title;
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -76,7 +61,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
   return (
     <div
       data-testid={`card-bike-${bike.id}`}
-      className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 flex items-stretch"
+      className="group min-h-[136px] bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 flex items-stretch"
       onClick={() => navigate(`/listings/${bike.id}`)}
     >
       {/* Text side (right in RTL = right visually) */}
@@ -89,71 +74,8 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
           {displayTitle}
         </h3>
 
-        {/* Listing details entered by the seller */}
-        <div
-          data-testid={`bike-details-${bike.id}`}
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-            <CategoryIcon className="h-3 w-3 shrink-0" />
-            {isBicycleCategory ? "هوائية - " : ""}
-            {categoryLabels[bike.category] || bike.category}
-          </span>
-          <span
-            data-testid={`bike-condition-${bike.id}`}
-            className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900"
-          >
-            الحالة: {conditionLabels[bike.condition] || bike.condition}
-          </span>
-          {bike.brand && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              الشركة: {bike.brand}
-            </span>
-          )}
-          {bike.province && (
-            <span
-              data-testid={`bike-province-${bike.id}`}
-              className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900"
-            >
-              المحافظة: {bike.province}
-            </span>
-          )}
-          {bike.mileage != null && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              الممشى: {bike.mileage.toLocaleString()} كم
-            </span>
-          )}
-          {bike.engineCapacity != null && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              المحرك: {bike.engineCapacity} سي سي
-            </span>
-          )}
-          {typeof bike.hasDelivery === "boolean" && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              التوصيل: {bike.hasDelivery ? "متوفر" : "غير متوفر"}
-            </span>
-          )}
-          {bike.category === "motorcycle" && typeof bike.hasDocuments === "boolean" && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              الأوراق: {bike.hasDocuments ? "متوفرة" : "غير متوفرة"}
-            </span>
-          )}
-          {bike.phone && (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              رقم التواصل: <span dir="ltr">{bike.phone}</span>
-            </span>
-          )}
-          {bike.images?.length ? (
-            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
-              الصور: {bike.images.length}
-            </span>
-          ) : null}
-        </div>
-
-        {bike.description?.trim() && (
-          <p className="whitespace-pre-wrap break-words text-xs leading-relaxed text-gray-700">
-            {bike.description}
-          </p>
+        {bike.brand && !bike.title.includes(bike.brand) && (
+          <p className="text-xs text-gray-500">{bike.brand}</p>
         )}
 
         {/* Price */}
@@ -167,7 +89,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
       </div>
 
       {/* Image side (left in RTL = left visually) */}
-      <div className="relative mx-2 my-auto aspect-square w-20 flex-shrink-0 overflow-hidden rounded-lg sm:w-24">
+      <div className="relative w-32 flex-shrink-0">
         {bike.images?.[0] ? (
           <img
             src={bike.images[0]}

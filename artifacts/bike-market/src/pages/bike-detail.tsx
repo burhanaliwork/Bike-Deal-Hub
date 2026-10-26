@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight, BadgeCheck, MapPin, Store, X } from "lucide-react";
-import { useGetBike, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
+import { useGetBike, useListBikes, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
-import { StatusBadge } from "@/components/bike-card";
+import BikeCard, { StatusBadge } from "@/components/bike-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +28,7 @@ export default function BikeDetailPage() {
   const qc = useQueryClient();
   const bikeId = parseInt(id || "0");
   const { data: bike, isLoading } = useGetBike(bikeId, { query: { enabled: !!bikeId } } as any);
+  const { data: allBikes, isLoading: isRelatedLoading } = useListBikes({ limit: 50 } as any);
   const addFav = useAddFavorite();
   const removeFav = useRemoveFavorite();
 
@@ -38,6 +39,12 @@ export default function BikeDetailPage() {
   const touchDeltaX = useRef(0);
 
   const imageCount = bike?.images?.length ?? 0;
+  const relatedBikes = bike && allBikes
+    ? [
+        ...allBikes.filter((item: any) => item.id !== bike.id && item.category === bike.category),
+        ...allBikes.filter((item: any) => item.id !== bike.id && item.category !== bike.category),
+      ].slice(0, 4)
+    : [];
   const whatsAppUrl = bike
     ? createWhatsAppUrl(
         bike.phone,
@@ -138,6 +145,7 @@ export default function BikeDetailPage() {
             <Button onClick={() => navigate("/listings")} variant="outline">العودة للإعلانات</Button>
           </div>
         ) : (
+          <>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Images */}
             <div>
@@ -235,7 +243,14 @@ export default function BikeDetailPage() {
                         activeImage === i ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
                       )}
                     >
-                      <img src={img} alt={`${bike.title} ${i + 1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt={`${bike.title} ${i + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300";
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -249,47 +264,81 @@ export default function BikeDetailPage() {
                 <StatusBadge status={bike.status} />
               </div>
 
-              <div className="text-4xl font-black text-gray-900 mb-4">
-                {bike.priceOnRequest
-                  ? <span className="text-2xl font-bold text-muted-foreground">يرجى طلب السعر</span>
-                  : <>{Number(bike.price).toLocaleString()} <span className="text-2xl font-bold">د.ع</span></>
-                }
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-5">
-                <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium text-gray-900">
-                  <CategoryIcon className="w-4 h-4 text-gray-900" />
-                  {categoryLabels[bike.category] || bike.category}
-                </span>
-                <span className="text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">
-                  {conditionLabels[bike.condition] || bike.condition}
-                </span>
-                {bike.brand && (
-                  <span className="text-sm bg-muted px-3 py-1.5 rounded-lg font-medium">{bike.brand}</span>
-                )}
-                {bike.category === "motorcycle" && bike.mileage != null && (
-                  <span className="flex items-center gap-1.5 text-sm bg-muted px-3 py-1.5 rounded-lg font-medium text-gray-900">
-                    <Gauge className="w-4 h-4 text-gray-900" />
-                    {Number(bike.mileage).toLocaleString()} كم
-                  </span>
-                )}
-                {bike.category === "motorcycle" && (
-                  <span className={cn(
-                    "flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium",
-                    bike.hasDocuments ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
-                  )}>
-                    <Tag className="w-4 h-4" />
-                    {bike.hasDocuments ? "مع أوراق رسمية" : "بدون أوراق رسمية"}
-                  </span>
-                )}
-              </div>
-
-              {bike.description && (
-                <div className="mb-5">
-                  <h3 className="font-semibold text-foreground mb-2">مواصفات الدراجة</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{bike.description}</p>
+              <section className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm">
+                <div className="mb-4 border-b border-border pb-4">
+                  <span className="mb-1 block text-xs font-medium text-muted-foreground">السعر</span>
+                  <div className="text-3xl font-black text-gray-900">
+                    {bike.priceOnRequest
+                      ? <span className="text-xl font-bold text-muted-foreground">يرجى طلب السعر</span>
+                      : <>{Number(bike.price).toLocaleString()} <span className="text-xl font-bold">د.ع</span></>
+                    }
+                  </div>
                 </div>
-              )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-muted/60 p-3">
+                    <span className="mb-1 block text-xs text-muted-foreground">المحافظة</span>
+                    <span className="font-semibold text-gray-900">{bike.province || "غير محددة"}</span>
+                  </div>
+                  <div className="rounded-lg bg-muted/60 p-3">
+                    <span className="mb-1 block text-xs text-muted-foreground">التوصيل</span>
+                    <span className="font-semibold text-gray-900">
+                      {typeof bike.hasDelivery === "boolean"
+                        ? bike.hasDelivery ? "متوفر" : "غير متوفر"
+                        : "غير محدد"}
+                    </span>
+                  </div>
+                  <div className="rounded-lg bg-muted/60 p-3">
+                    <span className="mb-1 block text-xs text-muted-foreground">الحالة</span>
+                    <span className="font-semibold text-gray-900">{conditionLabels[bike.condition] || bike.condition}</span>
+                  </div>
+                  <div className="rounded-lg bg-muted/60 p-3">
+                    <span className="mb-1 block text-xs text-muted-foreground">رقم التواصل</span>
+                    <a href={`tel:${bike.phone}`} dir="ltr" className="block text-left font-semibold text-gray-900 hover:underline">
+                      {bike.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-sm font-medium text-gray-900">
+                    <CategoryIcon className="h-4 w-4 text-gray-900" />
+                    {categoryLabels[bike.category] || bike.category}
+                  </span>
+                  {bike.brand && (
+                    <span className="rounded-lg bg-muted px-3 py-1.5 text-sm font-medium">{bike.brand}</span>
+                  )}
+                  {bike.category === "motorcycle" && bike.mileage != null && (
+                    <span className="flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-sm font-medium text-gray-900">
+                      <Gauge className="h-4 w-4 text-gray-900" />
+                      الممشى: {Number(bike.mileage).toLocaleString()} كم
+                    </span>
+                  )}
+                  {bike.engineCapacity != null && (
+                    <span className="rounded-lg bg-muted px-3 py-1.5 text-sm font-medium text-gray-900">
+                      المحرك: {bike.engineCapacity} سي سي
+                    </span>
+                  )}
+                  {bike.category === "motorcycle" && (
+                    <span className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium",
+                      bike.hasDocuments ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
+                    )}>
+                      <Tag className="h-4 w-4" />
+                      {bike.hasDocuments ? "مع أوراق رسمية" : "بدون أوراق رسمية"}
+                    </span>
+                  )}
+                </div>
+
+                {bike.description?.trim() && (
+                  <div className="mt-4 border-t border-border pt-4">
+                    <h3 className="mb-2 font-semibold text-foreground">تفاصيل البائع</h3>
+                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+                      {bike.description}
+                    </p>
+                  </div>
+                )}
+              </section>
 
               {bike.showroom && (
                 <div className="mb-5 bg-card border border-border rounded-xl p-4">
@@ -358,6 +407,23 @@ export default function BikeDetailPage() {
               </div>
             </div>
           </div>
+          {!isRelatedLoading && (
+            <section className="mt-12 border-t border-border pt-8" data-testid="related-bikes">
+              <h2 className="mb-4 text-xl font-bold text-foreground">دراجات مشابهة وإعلانات أخرى</h2>
+              {relatedBikes.length > 0 ? (
+                <div className="space-y-3">
+                  {relatedBikes.map((relatedBike: any) => (
+                    <BikeCard key={relatedBike.id} bike={relatedBike} />
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-xl bg-muted/50 px-4 py-6 text-center text-sm text-muted-foreground">
+                  ماكو إعلانات أخرى حالياً
+                </p>
+              )}
+            </section>
+          )}
+          </>
         )}
       </div>
     </div>
