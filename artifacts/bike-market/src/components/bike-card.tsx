@@ -16,7 +16,12 @@ interface Bike {
   brand?: string;
   phone: string;
   images?: string[];
-  mileage?: number;
+  description?: string | null;
+  province?: string | null;
+  hasDelivery?: boolean;
+  hasDocuments?: boolean;
+  mileage?: number | null;
+  engineCapacity?: number | null;
   status: string;
   isFavorited?: boolean;
   userName?: string;
@@ -41,6 +46,10 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
   const removeFav = useRemoveFavorite();
   const CategoryIcon = categoryIcons[bike.category] || BikeIcon;
   const [, navigate] = useLocation();
+  const isBicycleCategory = !["electric", "motorcycle"].includes(bike.category);
+  const displayTitle = isBicycleCategory && bike.title.startsWith("دراجة هوائية")
+    ? "دراجة هوائية"
+    : bike.title;
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -66,29 +75,86 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
 
   return (
     <div
+      data-testid={`card-bike-${bike.id}`}
       className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100 flex items-stretch"
       onClick={() => navigate(`/listings/${bike.id}`)}
     >
       {/* Text side (right in RTL = right visually) */}
       <div className="flex-1 p-3.5 flex flex-col gap-1.5 min-w-0">
         {/* Title */}
-        <h3 className="font-bold text-[#0D1B35] text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
-          {bike.title}
+        <h3
+          data-testid={`text-bike-title-${bike.id}`}
+          className="font-bold text-gray-900 text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2"
+        >
+          {displayTitle}
         </h3>
 
-        {/* Specs chips */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs bg-gray-100 text-gray-900 px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5">
-            <CategoryIcon className="w-2.5 h-2.5" />
+        {/* Listing details entered by the seller */}
+        <div
+          data-testid={`bike-details-${bike.id}`}
+          className="flex flex-wrap items-center gap-1.5"
+        >
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+            <CategoryIcon className="h-3 w-3 shrink-0" />
+            {isBicycleCategory ? "هوائية - " : ""}
             {categoryLabels[bike.category] || bike.category}
           </span>
-          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-            {conditionLabels[bike.condition] || bike.condition}
+          <span
+            data-testid={`bike-condition-${bike.id}`}
+            className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900"
+          >
+            الحالة: {conditionLabels[bike.condition] || bike.condition}
           </span>
           {bike.brand && (
-            <span className="text-xs text-gray-400">{bike.brand}</span>
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              الشركة: {bike.brand}
+            </span>
           )}
+          {bike.province && (
+            <span
+              data-testid={`bike-province-${bike.id}`}
+              className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900"
+            >
+              المحافظة: {bike.province}
+            </span>
+          )}
+          {bike.mileage != null && (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              الممشى: {bike.mileage.toLocaleString()} كم
+            </span>
+          )}
+          {bike.engineCapacity != null && (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              المحرك: {bike.engineCapacity} سي سي
+            </span>
+          )}
+          {typeof bike.hasDelivery === "boolean" && (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              التوصيل: {bike.hasDelivery ? "متوفر" : "غير متوفر"}
+            </span>
+          )}
+          {bike.category === "motorcycle" && typeof bike.hasDocuments === "boolean" && (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              الأوراق: {bike.hasDocuments ? "متوفرة" : "غير متوفرة"}
+            </span>
+          )}
+          {bike.phone && (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              رقم التواصل: <span dir="ltr">{bike.phone}</span>
+            </span>
+          )}
+          {bike.images?.length ? (
+            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-900">
+              الصور: {bike.images.length}
+            </span>
+          ) : null}
         </div>
+
+        {bike.description?.trim() && (
+          <p className="whitespace-pre-wrap break-words text-xs leading-relaxed text-gray-700">
+            {bike.description}
+          </p>
+        )}
 
         {/* Price */}
         <div className="text-lg font-black text-gray-900 leading-none mt-auto">
@@ -101,18 +167,18 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
       </div>
 
       {/* Image side (left in RTL = left visually) */}
-      <div className="relative w-28 flex-shrink-0">
+      <div className="relative mx-2 my-auto aspect-square w-20 flex-shrink-0 overflow-hidden rounded-lg sm:w-24">
         {bike.images?.[0] ? (
           <img
             src={bike.images[0]}
-            alt={bike.title}
-            className="w-full h-full object-cover"
+            alt={displayTitle}
+            className="h-full w-full object-cover"
             onError={(e) => {
               (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300";
             }}
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center min-h-[110px]">
+          <div className="flex h-full w-full items-center justify-center bg-gray-100">
             <BikeIcon className="w-10 h-10 text-gray-300" />
           </div>
         )}
@@ -133,6 +199,7 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         {/* Favorite */}
         <button
           onClick={handleFavoriteToggle}
+          data-testid={`button-favorite-bike-${bike.id}`}
           className={cn(
             "absolute top-1.5 left-1.5 w-6 h-6 rounded-full flex items-center justify-center shadow transition-all",
             bike.isFavorited

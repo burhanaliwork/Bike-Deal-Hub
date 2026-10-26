@@ -137,10 +137,16 @@ export default function SellPage() {
   const removeImage = (index: number) => setImages((prev) => prev.filter((_, i) => i !== index));
 
   const canProceedStep1 = form.phone.trim().length >= 10;
-  const canProceedStep2 = !!mainType && !!form.title && !!form.condition &&
+  const canProceedStep2 = !!mainType &&
+    (mainType === "bicycle" || !!form.title.trim()) &&
+    !!form.condition &&
     images.length >= MIN_IMAGES &&
     (mainType !== "bicycle" || !!bicycleCategory);
   const canProceedStep3 = !!form.province && (form.priceOnRequest || !!form.price);
+  const bicycleCategoryLabel = bicycleCategories.find((category) => category.value === bicycleCategory)?.label ?? bicycleCategory;
+  const generatedBicycleTitle = form.brand.trim()
+    ? `دراجة هوائية - ${form.brand.trim()}`
+    : "دراجة هوائية";
 
   const handleNext = () => {
     if (step === 1 && !canProceedStep1) {
@@ -149,7 +155,7 @@ export default function SellPage() {
     if (step === 2) {
       if (!mainType) { toast({ title: "اختر نوع الدراجة", variant: "destructive" }); return; }
       if (mainType === "bicycle" && !bicycleCategory) { toast({ title: "اختر فئة الدراجة الهوائية", variant: "destructive" }); return; }
-      if (!form.title) { toast({ title: "أدخل اسم الدراجة", variant: "destructive" }); return; }
+      if (mainType !== "bicycle" && !form.title.trim()) { toast({ title: "أدخل اسم الدراجة", variant: "destructive" }); return; }
       if (!form.condition) { toast({ title: "اختر حالة الدراجة", variant: "destructive" }); return; }
       if (images.length < MIN_IMAGES) { toast({ title: `أضف ${MIN_IMAGES} صور على الأقل`, variant: "destructive" }); return; }
     }
@@ -162,7 +168,7 @@ export default function SellPage() {
 
   const handleSubmit = () => {
     const data = {
-      title: form.title,
+      title: mainType === "bicycle" ? generatedBicycleTitle : form.title.trim(),
       description: form.description || undefined,
       ...(form.priceOnRequest ? { priceOnRequest: true } : { price: parseFloat(form.price) }),
       category: resolvedCategory,
@@ -336,21 +342,23 @@ export default function SellPage() {
               </div>
             )}
 
-            {/* Bike name */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-base font-bold">اسم الدراجة <span className="text-red-500">*</span></Label>
-              <Input
-                id="title"
-                className="h-11"
-                placeholder="مثال: هوندا سي بي 150"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-            </div>
+            {/* Only motorized listings need a custom model title. */}
+            {mainType !== "bicycle" && (
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-base font-bold">اسم الدراجة <span className="text-red-500">*</span></Label>
+                <Input
+                  id="title"
+                  className="h-11"
+                  placeholder="مثال: هوندا سي بي 150"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+            )}
 
             {/* Brand */}
             <div className="space-y-2">
-              <Label htmlFor="brand" className="text-base font-bold">شركة الدراجة</Label>
+              <Label htmlFor="brand" className="text-base font-bold">شركة الدراجة <span className="text-sm font-normal text-gray-500">(اختياري)</span></Label>
               <div className="relative">
                 <Tag className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -575,20 +583,62 @@ export default function SellPage() {
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
                 <span className="text-muted-foreground">الهاتف:</span>
                 <span className="font-semibold" dir="ltr">{form.phone}</span>
-                <span className="text-muted-foreground">الاسم:</span>
-                <span className="font-semibold truncate">{form.title}</span>
+                {mainType !== "bicycle" && (
+                  <>
+                    <span className="text-muted-foreground">اسم الدراجة:</span>
+                    <span className="font-semibold truncate">{form.title}</span>
+                  </>
+                )}
                 <span className="text-muted-foreground">النوع:</span>
                 <span className="font-semibold">{mainTypes.find(t => t.value === mainType)?.label ?? mainType}</span>
+                {mainType === "bicycle" && (
+                  <>
+                    <span className="text-muted-foreground">الفئة:</span>
+                    <span className="font-semibold">{bicycleCategoryLabel}</span>
+                  </>
+                )}
+                {form.brand.trim() && (
+                  <>
+                    <span className="text-muted-foreground">الشركة:</span>
+                    <span className="font-semibold">{form.brand.trim()}</span>
+                  </>
+                )}
                 <span className="text-muted-foreground">الحالة:</span>
                 <span className="font-semibold">{form.condition === "new" ? "جديدة" : "مستعملة"}</span>
                 <span className="text-muted-foreground">المحافظة:</span>
                 <span className="font-semibold">{form.province}</span>
+                <span className="text-muted-foreground">التوصيل:</span>
+                <span className="font-semibold">{form.hasDelivery ? "متوفر" : "غير متوفر"}</span>
+                {mainType === "motorcycle" && form.mileage && (
+                  <>
+                    <span className="text-muted-foreground">الممشى:</span>
+                    <span className="font-semibold">{Number(form.mileage).toLocaleString()} كم</span>
+                  </>
+                )}
+                {mainType === "motorcycle" && form.engineCapacity && (
+                  <>
+                    <span className="text-muted-foreground">سعة المحرك:</span>
+                    <span className="font-semibold">{form.engineCapacity} سي سي</span>
+                  </>
+                )}
+                {mainType === "motorcycle" && (
+                  <>
+                    <span className="text-muted-foreground">الأوراق الرسمية:</span>
+                    <span className="font-semibold">{form.hasDocuments ? "متوفرة" : "غير متوفرة"}</span>
+                  </>
+                )}
                 <span className="text-muted-foreground">السعر:</span>
                 <span className="font-semibold text-primary">
                   {form.priceOnRequest ? "يرجى طلب السعر" : `${Number(form.price).toLocaleString()} د.ع`}
                 </span>
                 <span className="text-muted-foreground">الصور:</span>
                 <span className="font-semibold">{images.length} صور</span>
+                {form.description.trim() && (
+                  <>
+                    <span className="text-muted-foreground">الوصف:</span>
+                    <span className="col-span-2 whitespace-pre-wrap break-words font-semibold">{form.description.trim()}</span>
+                  </>
+                )}
               </div>
             </div>
 
