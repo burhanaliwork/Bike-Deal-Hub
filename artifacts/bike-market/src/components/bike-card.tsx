@@ -28,6 +28,14 @@ interface Bike {
   createdAt: string;
 }
 
+const conditionLabels: Record<string, string> = {
+  new: "جديدة",
+  used: "مستخدمة",
+  like_new: "شبه جديدة",
+  good: "جيدة",
+  fair: "مقبولة",
+};
+
 export default function BikeCard({ bike, showStatus = false }: { bike: Bike; showStatus?: boolean }) {
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -77,6 +85,21 @@ export default function BikeCard({ bike, showStatus = false }: { bike: Bike; sho
         {bike.brand && !bike.title.includes(bike.brand) && (
           <p className="text-xs text-gray-500">{bike.brand}</p>
         )}
+
+        <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold text-gray-900">
+          <span
+            data-testid={`bike-province-${bike.id}`}
+            className="rounded-full bg-gray-100 px-2 py-1"
+          >
+            المحافظة: {bike.province || "غير محددة"}
+          </span>
+          <span
+            data-testid={`bike-condition-${bike.id}`}
+            className="rounded-full bg-gray-100 px-2 py-1"
+          >
+            الحالة: {conditionLabels[bike.condition] || bike.condition}
+          </span>
+        </div>
 
         {/* Price */}
         <div className="text-lg font-black text-gray-900 leading-none mt-auto">
