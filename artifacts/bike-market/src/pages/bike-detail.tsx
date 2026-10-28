@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useLocation, Link } from "wouter";
 import { ArrowRight, Phone, Heart, Share2, Bike, Tag, Zap, Mountain, Wind, Users, HelpCircle, Gauge, ChevronLeft, ChevronRight, BadgeCheck, MapPin, Store, X } from "lucide-react";
 import { useGetBike, useListBikes, useAddFavorite, useRemoveFavorite, getGetFavoritesQueryKey, getListBikesQueryKey, getGetBikeQueryKey } from "@workspace/api-client-react";
@@ -37,6 +37,15 @@ export default function BikeDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [lightboxOpen]);
 
   const imageCount = bike?.images?.length ?? 0;
   const relatedBikes = bike && allBikes
@@ -430,15 +439,40 @@ export default function BikeDetailPage() {
 
     {/* Fullscreen Lightbox */}
 
-    {lightboxOpen && bike?.images && (
+    {lightboxOpen && bike?.images && bike.images.length > 0 && (
       <div
-        className="fixed inset-0 z-[100] bg-black flex flex-col"
+        className="fixed inset-0 z-[100] h-[100dvh] w-screen overflow-hidden overscroll-none bg-black"
         onClick={() => setLightboxOpen(false)}
       >
+        <img
+          src={bike.images[activeImage]}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-70"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-black/15" />
+        <img
+          src={bike.images[activeImage]}
+          alt={`${bike.title} ${activeImage + 1}`}
+          className="absolute inset-0 h-full w-full object-contain p-1"
+          draggable={false}
+          onClick={(e) => e.stopPropagation()}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
+          }}
+        />
+
         {/* Close button */}
-        <div className="absolute top-4 right-4 z-10">
+        <div
+          className="absolute right-4 z-10"
+          style={{ top: "max(env(safe-area-inset-top), 1rem)" }}
+        >
           <button
             onClick={() => setLightboxOpen(false)}
+            aria-label="إغلاق عرض الصورة"
             className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
           >
             <X className="w-6 h-6" />
@@ -446,63 +480,47 @@ export default function BikeDetailPage() {
         </div>
 
         {/* Counter */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white/70 text-sm font-medium">
+        <div
+          className="absolute left-1/2 z-10 -translate-x-1/2 text-sm font-medium text-white/90"
+          style={{ top: "max(env(safe-area-inset-top), 1.5rem)" }}
+        >
           {activeImage + 1} / {bike.images.length}
         </div>
 
-        {/* Main image */}
-        <div
-          className="flex-1 flex items-center justify-center p-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div
-            dir="ltr"
-            className="w-full h-full flex transition-transform duration-300 ease-out"
-            style={{ transform: `translateX(-${activeImage * 100}%)` }}
-          >
-            {bike.images.map((img: string, i: number) => (
-              <div key={i} className="w-full h-full flex-shrink-0 flex items-center justify-center">
-                <img
-                  src={img}
-                  alt={`${bike.title} ${i + 1}`}
-                  className="max-w-full max-h-full object-contain rounded-lg"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600";
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Navigation */}
+        {/* Image navigation overlays */}
         {bike.images.length > 1 && (
-          <div
-            className="flex items-center justify-center gap-6 py-5"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <>
             <button
               onClick={goToPrev}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              aria-label="الصورة السابقة"
+              className="absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/55"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
-            <div className="flex gap-2">
+            <div
+              className="absolute left-1/2 z-10 flex -translate-x-1/2 gap-2"
+              style={{ bottom: "max(env(safe-area-inset-bottom), 1rem)" }}
+            >
               {bike.images.map((_: string, i: number) => (
                 <button
                   key={i}
-                  onClick={() => setActiveImage(i)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImage(i);
+                  }}
+                  aria-label={`عرض الصورة ${i + 1}`}
                   className={`rounded-full transition-all ${activeImage === i ? "bg-white w-6 h-2" : "bg-white/40 w-2 h-2"}`}
                 />
               ))}
             </div>
             <button
               onClick={goToNext}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              aria-label="الصورة التالية"
+              className="absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition-colors hover:bg-black/55"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-          </div>
+          </>
         )}
       </div>
     )}
