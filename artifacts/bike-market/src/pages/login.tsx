@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { signInWithCustomToken } from "firebase/auth";
 import { useLogin } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setStoredAuth } from "@/lib/accountAuth";
-import { firebaseAuth } from "@/lib/firebase";
 import { Lock, User } from "lucide-react";
 
 export default function LoginPage() {
@@ -23,28 +21,16 @@ export default function LoginPage() {
     login.mutate(
       { data: { username: username.trim(), password } },
       {
-        onSuccess: async (session) => {
-          try {
-            const credential = await signInWithCustomToken(firebaseAuth, session.customToken);
-            await credential.user.getIdToken();
-            setStoredAuth({
-              username: session.username,
-              role: session.role,
-              showroom: session.showroom ?? null,
-            });
-            setLocation(session.role === "admin" ? "/admin" : "/showroom");
-          } catch {
-            setError("تعذر تفعيل تسجيل الدخول عبر Firebase. تحقق من إعدادات الخدمة.");
-          }
+        onSuccess: (session) => {
+          setStoredAuth({
+            token: session.token,
+            username: session.username,
+            role: session.role,
+            showroom: session.showroom ?? null,
+          });
+          setLocation(session.role === "admin" ? "/admin" : "/showroom");
         },
-        onError: (err: any) => {
-          const status = err?.status ?? err?.response?.status;
-          setError(
-            status === 401
-              ? "اسم المستخدم أو كلمة المرور غير صحيحة"
-              : "تعذر الاتصال بخدمة تسجيل الدخول. حاول مرة أخرى لاحقاً.",
-          );
-        },
+        onError: () => setError("اسم المستخدم أو كلمة المرور غير صحيحة"),
       },
     );
   };

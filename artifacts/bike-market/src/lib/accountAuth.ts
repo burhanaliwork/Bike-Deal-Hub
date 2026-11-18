@@ -1,12 +1,10 @@
 import { useSyncExternalStore } from "react";
-import { signOut } from "firebase/auth";
-import { firebaseAuth } from "@/lib/firebase";
 import type { ShowroomSummary } from "@workspace/api-client-react";
 
 const KEY = "motorsby_auth";
 
 export interface StoredAuth {
-  token?: string;
+  token: string;
   username: string;
   role: string; // 'admin' | 'showroom'
   showroom: ShowroomSummary | null;
@@ -36,8 +34,7 @@ export function setStoredAuth(auth: StoredAuth) {
   listeners.forEach((l) => l());
 }
 
-export async function clearStoredAuth() {
-  await signOut(firebaseAuth);
+export function clearStoredAuth() {
   localStorage.removeItem(KEY);
   cached = null;
   listeners.forEach((l) => l());

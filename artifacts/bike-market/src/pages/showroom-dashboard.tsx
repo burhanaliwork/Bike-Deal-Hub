@@ -62,13 +62,9 @@ export default function ShowroomDashboardPage() {
     );
   };
 
-  const handleLogout = async () => {
-    try {
-      await clearStoredAuth();
-      qc.clear();
-    } catch {
-      toast({ title: "تعذر إنهاء جلسة الدخول", variant: "destructive" });
-    }
+  const handleLogout = () => {
+    clearStoredAuth();
+    qc.clear();
   };
 
   return (

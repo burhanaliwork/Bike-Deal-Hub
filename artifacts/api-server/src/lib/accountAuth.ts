@@ -2,7 +2,6 @@ import crypto from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { db, accountsTable, showroomsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { getFirebaseAdminAuth } from "./firebaseAdmin";
 
 const SECRET = process.env.SESSION_SECRET;
 if (!SECRET) {
@@ -82,54 +81,20 @@ function extractToken(req: Request): string | null {
   return header.slice(7);
 }
 
-export async function getAccount(req: Request): Promise<AccountTokenPayload | null> {
+export function getAccount(req: Request): AccountTokenPayload | null {
   const token = extractToken(req);
   if (!token) return null;
-
-  try {
-    const decoded = await getFirebaseAdminAuth().verifyIdToken(token);
-    const accountId = Number(decoded.accountId);
-    const username = decoded.username;
-    const role = decoded.role;
-    const showroomClaim = decoded.showroomId;
-    const showroomId = showroomClaim == null ? null : Number(showroomClaim);
-
-    if (
-      !Number.isSafeInteger(accountId) ||
-      accountId <= 0 ||
-      typeof username !== "string" ||
-      !["admin", "showroom"].includes(String(role)) ||
-      (showroomClaim != null && (!Number.isSafeInteger(showroomId) || showroomId! <= 0))
-    ) {
-      return null;
-    }
-
-    return {
-      sub: accountId,
-      username,
-      role: String(role),
-      showroomId,
-      exp: decoded.exp,
-    };
-  } catch {
-    // Existing signed sessions remain valid until they expire, while new
-    // logins use Firebase ID tokens.
-    return verifyToken(token);
-  }
+  return verifyToken(token);
 }
 
-export async function requireAccount(req: AccountRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const account = await getAccount(req);
-    if (!account) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    req.account = account;
-    next();
-  } catch (err) {
-    next(err);
+export function requireAccount(req: AccountRequest, res: Response, next: NextFunction): void {
+  const account = getAccount(req);
+  if (!account) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
+  req.account = account;
+  next();
 }
 
 async function revalidateAccount(payload: AccountTokenPayload): Promise<boolean> {
@@ -147,48 +112,48 @@ async function revalidateAccount(payload: AccountTokenPayload): Promise<boolean>
   return true;
 }
 
-export async function requireAdminAccount(req: AccountRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const account = await getAccount(req);
-    if (!account) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    if (account.role !== "admin") {
-      res.status(403).json({ error: "Forbidden" });
-      return;
-    }
-    if (!(await revalidateAccount(account))) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    req.account = account;
-    next();
-  } catch (err) {
-    next(err);
+export function requireAdminAccount(req: AccountRequest, res: Response, next: NextFunction): void {
+  const account = getAccount(req);
+  if (!account) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
+  if (account.role !== "admin") {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  revalidateAccount(account)
+    .then((valid) => {
+      if (!valid) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      req.account = account;
+      next();
+    })
+    .catch(next);
 }
 
-export async function requireShowroomAccount(req: AccountRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const account = await getAccount(req);
-    if (!account) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    if (account.role !== "showroom" || !account.showroomId) {
-      res.status(403).json({ error: "Forbidden" });
-      return;
-    }
-    if (!(await revalidateAccount(account))) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-    req.account = account;
-    next();
-  } catch (err) {
-    next(err);
+export function requireShowroomAccount(req: AccountRequest, res: Response, next: NextFunction): void {
+  const account = getAccount(req);
+  if (!account) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
+  if (account.role !== "showroom" || !account.showroomId) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  revalidateAccount(account)
+    .then((valid) => {
+      if (!valid) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
+      req.account = account;
+      next();
+    })
+    .catch(next);
 }
 
 // ---------------- Helpers ----------------

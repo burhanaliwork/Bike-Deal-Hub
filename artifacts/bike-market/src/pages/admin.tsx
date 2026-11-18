@@ -31,7 +31,6 @@ const statusLabels: Record<string, string> = {
 export default function AdminPage() {
   const account = useAccountAuth();
   const qc = useQueryClient();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   if (!account) return <Redirect to="/login" />;
@@ -56,13 +55,9 @@ export default function AdminPage() {
     { id: "users", label: "المستخدمون", icon: Users },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await clearStoredAuth();
-      qc.clear();
-    } catch {
-      toast({ title: "تعذر إنهاء جلسة الدخول", variant: "destructive" });
-    }
+  const handleLogout = () => {
+    clearStoredAuth();
+    qc.clear();
   };
 
   return (
