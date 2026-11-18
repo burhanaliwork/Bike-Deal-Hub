@@ -797,9 +797,6 @@ components:
     AuthSession:
       type: object
       properties:
-        token:
-          type: string
-          description: Legacy app session token used until Firebase Admin credentials are configured.
         customToken:
           type: string
           description: Firebase custom token used to sign in with the client SDK.
@@ -812,6 +809,7 @@ components:
           $ref: "#/components/schemas/ShowroomSummary"
           nullable: true
       required:
+        - customToken
         - username
         - role
 

@@ -23,9 +23,10 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 function AuthTokenSetter() {
   useEffect(() => {
     setAuthTokenGetter(async () => {
+      const firebaseToken = await getFirebaseIdToken();
+      if (firebaseToken) return firebaseToken;
       const stored = getStoredAuth();
-      if (stored?.token) return stored.token;
-      return getFirebaseIdToken();
+      return stored?.token ?? null;
     });
   }, []);
   return null;

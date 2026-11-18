@@ -1,3 +1,2 @@
 - [Express 5 wildcard routes](express5-wildcards.md) — `*` and `(.*)` are invalid in path-to-regexp v8; use `app.use()` for catch-all SPA fallback instead of `app.get()`.
 - [DB schema nullable migration](db-schema-migration.md) — drizzle-kit push requires interactive prompt for constraint changes; use direct SQL `ALTER TABLE` via executeSql instead.
-- [pnpm workspace symlinks](pnpm-workspace-symlinks.md) — After dependency changes, stale workspace links can break esbuild; rerun `pnpm install` before changing bundler config.

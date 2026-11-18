@@ -16,15 +16,8 @@ export const LoginBody = zod.object({
 });
 
 export const LoginResponse = zod.object({
-  token: zod
-    .string()
-    .optional()
-    .describe(
-      "Legacy app session token used until Firebase Admin credentials are configured.",
-    ),
   customToken: zod
     .string()
-    .optional()
     .describe("Firebase custom token used to sign in with the client SDK."),
   username: zod.string(),
   role: zod.string().describe("admin or showroom"),
