@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { signInWithCustomToken } from "firebase/auth";
+import { signInWithCustomToken, signOut } from "firebase/auth";
 import { useLogin } from "@workspace/api-client-react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
@@ -25,13 +25,25 @@ export default function LoginPage() {
       {
         onSuccess: async (session) => {
           try {
-            const credential = await signInWithCustomToken(firebaseAuth, session.customToken);
-            await credential.user.getIdToken();
-            setStoredAuth({
-              username: session.username,
-              role: session.role,
-              showroom: session.showroom ?? null,
-            });
+            if (session.customToken) {
+              const credential = await signInWithCustomToken(firebaseAuth, session.customToken);
+              await credential.user.getIdToken();
+              setStoredAuth({
+                username: session.username,
+                role: session.role,
+                showroom: session.showroom ?? null,
+              });
+            } else if (session.token) {
+              await signOut(firebaseAuth);
+              setStoredAuth({
+                token: session.token,
+                username: session.username,
+                role: session.role,
+                showroom: session.showroom ?? null,
+              });
+            } else {
+              throw new Error("Authentication response has no token");
+            }
             setLocation(session.role === "admin" ? "/admin" : "/showroom");
           } catch {
             setError("تعذر تفعيل تسجيل الدخول عبر Firebase. تحقق من إعدادات الخدمة.");

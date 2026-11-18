@@ -3,6 +3,7 @@ import { db, accountsTable, showroomsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   verifyPassword,
+  signToken,
   requireAccount,
   loadAccountWithShowroom,
   type AccountRequest,
@@ -46,21 +47,33 @@ router.post("/auth/login", async (req: any, res: any) => {
       showroom = s ?? null;
     }
 
-    let customToken: string;
-    try {
-      customToken = await getFirebaseAdminAuth().createCustomToken(`account-${account.id}`, {
-        accountId: account.id,
-        username: account.username,
-        role: account.role,
-        showroomId: account.showroomId ?? null,
-      });
-    } catch (err) {
-      req.log.error(err);
-      return res.status(503).json({ error: "Firebase Authentication is not configured" });
+    let authSession: { token?: string; customToken?: string };
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      try {
+        const customToken = await getFirebaseAdminAuth().createCustomToken(`account-${account.id}`, {
+          accountId: account.id,
+          username: account.username,
+          role: account.role,
+          showroomId: account.showroomId ?? null,
+        });
+        authSession = { customToken };
+      } catch (err) {
+        req.log.error(err);
+        return res.status(503).json({ error: "Firebase Authentication is not configured correctly" });
+      }
+    } else {
+      authSession = {
+        token: signToken({
+          sub: account.id,
+          username: account.username,
+          role: account.role,
+          showroomId: account.showroomId ?? null,
+        }),
+      };
     }
 
     res.json({
-      customToken,
+      ...authSession,
       username: account.username,
       role: account.role,
       showroom: showroomResponse(showroom),
