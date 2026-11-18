@@ -3,11 +3,11 @@ import { db, accountsTable, showroomsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   verifyPassword,
-  signToken,
   requireAccount,
   loadAccountWithShowroom,
   type AccountRequest,
 } from "../lib/accountAuth";
+import { getFirebaseAdminAuth } from "../lib/firebaseAdmin";
 
 const router = Router();
 
@@ -46,15 +46,21 @@ router.post("/auth/login", async (req: any, res: any) => {
       showroom = s ?? null;
     }
 
-    const token = signToken({
-      sub: account.id,
-      username: account.username,
-      role: account.role,
-      showroomId: account.showroomId ?? null,
-    });
+    let customToken: string;
+    try {
+      customToken = await getFirebaseAdminAuth().createCustomToken(`account-${account.id}`, {
+        accountId: account.id,
+        username: account.username,
+        role: account.role,
+        showroomId: account.showroomId ?? null,
+      });
+    } catch (err) {
+      req.log.error(err);
+      return res.status(503).json({ error: "Firebase Authentication is not configured" });
+    }
 
     res.json({
-      token,
+      customToken,
       username: account.username,
       role: account.role,
       showroom: showroomResponse(showroom),

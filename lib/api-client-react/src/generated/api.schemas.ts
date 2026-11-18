@@ -96,7 +96,8 @@ export interface LoginBody {
 }
 
 export interface AuthSession {
-  token: string;
+  /** Firebase custom token used to sign in with the client SDK. */
+  customToken: string;
   username: string;
   /** admin or showroom */
   role: string;

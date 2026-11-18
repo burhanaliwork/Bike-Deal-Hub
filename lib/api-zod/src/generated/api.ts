@@ -16,7 +16,9 @@ export const LoginBody = zod.object({
 });
 
 export const LoginResponse = zod.object({
-  token: zod.string(),
+  customToken: zod
+    .string()
+    .describe("Firebase custom token used to sign in with the client SDK."),
   username: zod.string(),
   role: zod.string().describe("admin or showroom"),
   showroom: zod

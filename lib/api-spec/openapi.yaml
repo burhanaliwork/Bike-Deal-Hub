@@ -797,8 +797,9 @@ components:
     AuthSession:
       type: object
       properties:
-        token:
+        customToken:
           type: string
+          description: Firebase custom token used to sign in with the client SDK.
         username:
           type: string
         role:
@@ -808,7 +809,7 @@ components:
           $ref: "#/components/schemas/ShowroomSummary"
           nullable: true
       required:
-        - token
+        - customToken
         - username
         - role
 

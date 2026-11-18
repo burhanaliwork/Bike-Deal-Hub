@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/queryClient";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 import { getStoredAuth } from "@/lib/accountAuth";
+import { getFirebaseIdToken } from "@/lib/firebase";
 import HomePage from "@/pages/home";
 import ListingsPage from "@/pages/listings";
 import BikeDetailPage from "@/pages/bike-detail";
@@ -22,6 +23,8 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 function AuthTokenSetter() {
   useEffect(() => {
     setAuthTokenGetter(async () => {
+      const firebaseToken = await getFirebaseIdToken();
+      if (firebaseToken) return firebaseToken;
       const stored = getStoredAuth();
       return stored?.token ?? null;
     });
